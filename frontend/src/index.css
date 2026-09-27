@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=JetBrains+Mono:wght@400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+    :root {
+        --background: 40 43% 98%;
+        --foreground: 222 47% 11%;
+        --card: 0 0% 100%;
+        --card-foreground: 222 47% 11%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 222 47% 11%;
+        --primary: 162 84% 20%;
+        --primary-foreground: 152 76% 96%;
+        --secondary: 40 30% 94%;
+        --secondary-foreground: 222 47% 11%;
+        --muted: 40 20% 94%;
+        --muted-foreground: 215 16% 47%;
+        --accent: 32 95% 44%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 0 72% 51%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 214 20% 88%;
+        --input: 214 20% 88%;
+        --ring: 162 84% 25%;
+        --radius: 0.9rem;
+    }
+    .dark {
+        --background: 222 47% 8%;
+        --foreground: 210 40% 98%;
+        --card: 217 33% 15%;
+        --card-foreground: 210 40% 98%;
+        --popover: 217 33% 13%;
+        --popover-foreground: 210 40% 98%;
+        --primary: 160 84% 39%;
+        --primary-foreground: 222 47% 8%;
+        --secondary: 217 33% 18%;
+        --secondary-foreground: 210 40% 98%;
+        --muted: 217 33% 18%;
+        --muted-foreground: 215 20% 65%;
+        --accent: 32 95% 50%;
+        --accent-foreground: 222 47% 8%;
+        --destructive: 0 62% 45%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 217 33% 22%;
+        --input: 217 33% 22%;
+        --ring: 160 84% 39%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+.font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+.hub-grid-bg {
+    background-image: radial-gradient(hsl(162 84% 20% / 0.06) 1px, transparent 1px);
+    background-size: 22px 22px;
+}
+
+::selection { background: hsl(32 95% 44% / 0.25); }
+
+@layer base {
+    [data-debug-wrapper="true"] { display: contents !important; }
+}

@@ -1,0 +1,126 @@
+{
+  "brand": {
+    "name": "Dental Opportunity Hub",
+    "tagline": "One Platform. Every Dental Opportunity.",
+    "positioning": "India's Premier Dental Opportunity & Professional Services Marketplace connecting BDS/MDS Dentists, Specialists, Dental Clinics, Training Centers, and Dental Suppliers.",
+    "aesthetic_archetype": "Clinical Warmth & Swiss High-Contrast Marketplace"
+  },
+  "typography": {
+    "heading_font": "Plus Jakarta Sans, Outfit, sans-serif",
+    "body_font": "Plus Jakarta Sans, system-ui, sans-serif",
+    "mono_font": "JetBrains Mono, monospace",
+    "hierarchy": {
+      "h1_hero": "text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.15]",
+      "h2_section": "text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100",
+      "h3_card_title": "text-lg sm:text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100",
+      "subtitle": "text-base sm:text-lg text-slate-600 dark:text-slate-300 font-normal leading-relaxed",
+      "body": "text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-normal",
+      "caption": "text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+    }
+  },
+  "colors": {
+    "palette_type": "Organic Warm Emerald & Amber Ochre (Non-Generic Hospital Blue)",
+    "background_light": "#FDFBF7",
+    "background_card_light": "#FFFFFF",
+    "foreground_light": "#0F172A",
+    "background_dark": "#0B1120",
+    "background_card_dark": "#1E293B",
+    "foreground_dark": "#F8FAFC",
+    "primary": {
+      "emerald_900": "#064E3B",
+      "emerald_800": "#065F46",
+      "emerald_700": "#047857",
+      "emerald_600": "#059669",
+      "emerald_100": "#D1FAE5",
+      "emerald_50": "#ECFDF5"
+    },
+    "secondary_gold": {
+      "amber_700": "#B45309",
+      "amber_600": "#D97706",
+      "amber_500": "#F59E0B",
+      "amber_100": "#FEF3C7",
+      "amber_50": "#FFFBEB"
+    },
+    "slate_neutrals": {
+      "slate_900": "#0F172A",
+      "slate_800": "#1E293B",
+      "slate_700": "#334155",
+      "slate_600": "#475569",
+      "slate_400": "#94A3B8",
+      "slate_200": "#E2E8F0",
+      "slate_100": "#F1F5F9"
+    },
+    "verification_badges": {
+      "qualification_verified": "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800",
+      "credential_verified": "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800",
+      "clinic_verified": "bg-teal-100 text-teal-900 border-teal-300 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800",
+      "mobile_verified": "bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800"
+    }
+  },
+  "layout_and_grids": {
+    "spacing_philosophy": "Generous and dense hybrid. Padding p-6 to p-8 inside cards to avoid text collision.",
+    "hero_layout": "Asymmetric hero with interactive toggle ('I'M LOOKING FOR' vs 'I'M OFFERING') leading into quick search bar and category cards.",
+    "marketplace_grid": "grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8. Filter Sidebar: col-span-12 lg:col-span-3. Listing Feed: col-span-12 lg:col-span-9.",
+    "dashboard_grid": "grid-cols-1 md:grid-cols-4 gap-6. Sidebar Nav: col-span-1. Main Content / Metrics: col-span-3."
+  },
+  "components_and_features": {
+    "navigation_header": {
+      "style": "Sticky top-0 z-50 backdrop-blur-xl bg-white/85 dark:bg-slate-900/85 border-b border-slate-200/80 dark:border-slate-800 px-4 lg:px-8 py-3.5",
+      "elements": ["Brand Logo with Dental Emblem", "Hero Mode Switcher (Seeker vs Giver)", "Explore Categories Dropdown", "Directory Links (Dentists, Clinics)", "Post Opportunity CTA Button", "User Profile / Dashboard Menu"]
+    },
+    "hero_toggle": {
+      "seeker_mode": "I'm Looking For... (Jobs, Visiting Consultant, Clinic Space, Practice Buyout, MDS/Fellowships)",
+      "giver_mode": "I'm Offering / Posting... (Associate Jobs, Clinic Space Rentals, Practice Transfer, Dental Equipment, Courses)",
+      "styling": "Pill-shaped dual toggle with smooth spring animation, active emerald highlight and amber accent ring."
+    },
+    "opportunity_cards": {
+      "structure": "Bordered card with subtle hover translation (-translate-y-1), shadow-sm to shadow-md transition.",
+      "content": ["Opportunity Category Tag", "Title & Clinic/Org Name with Verification Badge", "Location & Work Mode (On-site / Visiting / Full-time / Shift-based)", "Compensation / Stipend / Price Range (INR)", "Key Perks (e.g. Chair-time split, Equipment provided)", "Quick Apply / Enquire Button", "Saved Bookmark Toggle"]
+    },
+    "multi_level_verification": {
+      "levels": [
+        "Mobile & Email Verified Badge",
+        "Qualification & DCI Council License Verified Badge",
+        "Clinical Establishment Registered Badge",
+        "Organisation / Recruiter Premium Badge"
+      ]
+    },
+    "dynamic_post_opportunity_form": {
+      "steps": [
+        "Select Category (Job / Visiting Consultant / Clinic Space / Practice Transfer / MDS Fellowship / Equipment / Services)",
+        "Key Details & Compensation (Title, Specialization e.g. Endodontist / Orthodontist, Location, Pay structure)",
+        "Requirements & Perks (Experience level, Equipment available, Working hours)",
+        "Verification & Contact Settings (Anonymous / Public contact, Application deadline)"
+      ]
+    },
+    "seeker_and_giver_dashboards": {
+      "seeker_dashboard": ["Applied Opportunities Tracker", "Saved Listings", "Consultant Portfolio & CV Builder", "Verification Status Wizard"],
+      "giver_dashboard": ["Active Opportunity Listings", "Applicant Management Pipeline", "Clinic Profile & Space Gallery", "Team Members / Visiting Consultants"]
+    },
+    "admin_moderation_dashboard": {
+      "features": ["Pending Verification Queue (DCI Certificates, Clinic Licenses)", "Flagged Opportunity Listings", "Marketplace Activity Metrics", "User & Clinic Management Table"]
+    }
+  },
+  "image_urls": {
+    "dental_clinic_hero": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNTl8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBkZW50YWwlMjBjbGluaWMlMjBkZW50aXN0JTIwY29uc3VsdGF0aW9uJTIwZXF1aXBtZW50fGVufDB8fHx8MTc5MDQ5NDQyNnww&ixlib=rb-4.1.0&q=85",
+    "dentist_consulting": "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNTl8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBkZW50YWwlMjBjbGluaWMlMjBkZW50aXN0JTIwY29uc3VsdGF0aW9uJTIwZXF1aXBtZW50fGVufDB8fHx8MTc5MDQ5NDQyNnww&ixlib=rb-4.1.0&q=85",
+    "dental_lab_implant": "https://images.unsplash.com/photo-1771442873035-474765b40ac6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA0MTJ8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBtZWRpY2FsJTIwbGFib3JhdG9yeSUyMGVxdWlwbWVudCUyMGRlbnRhbCUyMGxhYnxlbnwwfHx8fDE3OTA0OTQ0MzN8MA&ixlib=rb-4.1.0&q=85",
+    "dental_prosthetic_crafting": "https://images.unsplash.com/photo-1776406987595-ba14f3510c07?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA0MTJ8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBtZWRpY2FsJTIwbGFib3JhdG9yeSUyMGVxdWlwbWVudCUyMGRlbnRhbCUyMGxhYnxlbnwwfHx8fDE3OTA0OTQ0MzN8MA&ixlib=rb-4.1.0&q=85",
+    "dental_chair_modern": "https://images.unsplash.com/photo-1598256989800-fe5f95da9787?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNTl8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBkZW50YWwlMjBjbGluaWMlMjBkZW50aXN0JTIwY29uc3VsdGF0aW9uJTIwZXF1aXBtZW50fGVufDB8fHx8MTc5MDQ5NDQyNnww&ixlib=rb-4.1.0&q=85"
+  },
+  "instructions_to_main_agent": [
+    "Ensure all interactive components (buttons, filters, tabs, inputs, modals) include descriptive data-testid attributes.",
+    "DO NOT use generic bright hospital-blue styling. Use the Warm Emerald (#065F46 / #047857) and Amber Gold (#D97706) color palette provided.",
+    "Implement two-sided marketplace user flows seamlessly: Seeker View (Look for jobs/spaces/courses) vs Giver View (Post jobs/list clinic space/offer equipment).",
+    "Include verification badges across listing cards, dentist profiles, and clinic profiles to reflect trust levels.",
+    "Use Lucide React icons for all dental/medical/business icons.",
+    "Ensure standard modal overlays and dropdown menus have semi-opaque background blurs (never transparent or pitch black without blur).",
+    "Provide filtering by Indian States & Cities (e.g. Mumbai, Delhi NCR, Bengaluru, Hyderabad, Chennai, Pune, Ahmedabad) and Specialties (Endodontics, Orthodontics, Prosthodontics, Periodontics, Oral Surgery, Pedodontics, Oral Medicine/Pathology, General Dentistry)."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": {
+    "test_id_rule": "Every button, input, link, tab, card, and modal MUST contain a kebab-case data-testid attribute.",
+    "no_transparent_overlays": "Never use bg-transparent for dropdowns, popovers, or floating headers. Use backdrop-blur with bg-white/90 or bg-slate-900/90.",
+    "motion": "Use framer-motion for smooth entrance transitions, filter tab switches, and wizard step changes.",
+    "responsiveness": "Mobile-first layouts with accessible tap targets (min 44px) for doctors using mobile phones on the move."
+  }
+}
