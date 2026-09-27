@@ -11,8 +11,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import {
-  Search, Briefcase, Stethoscope, ArrowRight, ArrowLeft, Loader2, CheckCircle2,
+  Search, Briefcase, ArrowRight, ArrowLeft, Loader2, CheckCircle2,
 } from "lucide-react";
+import { ToothIcon } from "@/components/ToothIcon";
 import {
   LOOKING_CATEGORIES, OFFERING_CATEGORIES, SPECIALITIES, QUALIFICATIONS, EXPERIENCE_LEVELS,
   EMPLOYMENT_TYPES, AVAILABILITY, STATES, CITIES, SEEKER_PROFILE_TYPES, GIVER_PROFILE_TYPES,
@@ -92,8 +93,8 @@ export default function Register() {
     return (
       <div className="mx-auto max-w-5xl px-4 lg:px-8 py-16">
         <div className="text-center">
-          <span className="grid place-items-center h-12 w-12 rounded-2xl bg-emerald-800 text-white mx-auto"><Stethoscope className="h-6 w-6" /></span>
-          <h1 className="mt-5 font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">Join Dental Opportunity Hub</h1>
+          <span className="grid place-items-center h-12 w-12 rounded-2xl bg-emerald-800 text-white mx-auto"><ToothIcon className="h-6 w-6" /></span>
+          <h1 className="mt-5 font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">Join Dental Hub Pro</h1>
           <p className="mt-2 text-slate-600 dark:text-slate-300">What brings you here? Choose how you want to use the platform.</p>
         </div>
         <div className="mt-10 grid md:grid-cols-2 gap-6">

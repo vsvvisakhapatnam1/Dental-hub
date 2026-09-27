@@ -6,7 +6,8 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Stethoscope, Menu, ChevronDown, LayoutDashboard, LogOut, PlusCircle, ShieldCheck } from "lucide-react";
+import { Menu, ChevronDown, LayoutDashboard, LogOut, PlusCircle, ShieldCheck } from "lucide-react";
+import { ToothIcon } from "@/components/ToothIcon";
 
 const EXPLORE = [
   { label: "Jobs", to: "/opportunities?category=Job" },
@@ -39,10 +40,10 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
         <Link to="/" data-testid="nav-logo" className="flex items-center gap-2 shrink-0">
           <span className="grid place-items-center h-9 w-9 rounded-xl bg-emerald-800 text-white">
-            <Stethoscope className="h-5 w-5" />
+            <ToothIcon className="h-5 w-5" />
           </span>
           <span className="font-heading font-extrabold text-lg tracking-tight text-slate-900 dark:text-white leading-none">
-            Dental<span className="text-amber-600">Hub</span>
+            Dental Hub <span className="text-amber-600">Pro</span>
           </span>
         </Link>
 

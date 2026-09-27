@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Stethoscope, Loader2 } from "lucide-react";
+import { ToothIcon } from "@/components/ToothIcon";
 
 export default function Login() {
   const { login } = useAuth();
@@ -48,8 +49,8 @@ export default function Login() {
       <div className="grid place-items-center p-6">
         <form onSubmit={submit} className="w-full max-w-md" data-testid="login-form">
           <Link to="/" className="flex items-center gap-2 mb-8">
-            <span className="grid place-items-center h-9 w-9 rounded-xl bg-emerald-800 text-white"><Stethoscope className="h-5 w-5" /></span>
-            <span className="font-heading font-extrabold text-lg">Dental<span className="text-amber-600">Hub</span></span>
+            <span className="grid place-items-center h-9 w-9 rounded-xl bg-emerald-800 text-white"><ToothIcon className="h-5 w-5" /></span>
+            <span className="font-heading font-extrabold text-lg">Dental Hub <span className="text-amber-600">Pro</span></span>
           </Link>
           <h1 className="font-heading text-3xl font-bold text-slate-900 dark:text-white">Welcome back</h1>
           <p className="mt-1 text-slate-500">Log in to your account</p>

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Stethoscope } from "lucide-react";
+import { ToothIcon } from "@/components/ToothIcon";
 
 export function Footer() {
   return (
@@ -7,8 +7,8 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 lg:px-8 py-14 grid gap-10 md:grid-cols-4">
         <div className="md:col-span-1">
           <div className="flex items-center gap-2">
-            <span className="grid place-items-center h-9 w-9 rounded-xl bg-emerald-700 text-white"><Stethoscope className="h-5 w-5" /></span>
-            <span className="font-heading font-extrabold text-lg text-white">Dental<span className="text-amber-500">Hub</span></span>
+            <span className="grid place-items-center h-9 w-9 rounded-xl bg-emerald-700 text-white"><ToothIcon className="h-5 w-5" /></span>
+            <span className="font-heading font-extrabold text-lg text-white">Dental Hub <span className="text-amber-500">Pro</span></span>
           </div>
           <p className="mt-4 text-sm text-slate-400 leading-relaxed">One Platform. Every Dental Opportunity. India's dental opportunity & professional services marketplace.</p>
         </div>
