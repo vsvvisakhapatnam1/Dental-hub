@@ -1,0 +1,75 @@
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { MessageCircle, X, Phone, Send } from "lucide-react";
+
+const PHONE = "918951950389";
+const DISPLAY = "+91-89519 50389";
+
+export function WhatsAppWidget() {
+  const [open, setOpen] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const openChat = () => {
+    const text = encodeURIComponent(msg || "Hi Dental Hub Pro, I'd like to know more about your platform.");
+    window.open(`https://wa.me/${PHONE}?text=${text}`, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <div className="fixed bottom-24 right-5 z-[60] flex flex-col items-end gap-3">
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300, damping: 24 }}
+            data-testid="whatsapp-chatbox"
+            className="w-80 max-w-[calc(100vw-2.5rem)] overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl"
+          >
+            <div className="bg-[#075E54] p-4 text-white flex items-center gap-3">
+              <span className="grid place-items-center h-11 w-11 rounded-full bg-[#25D366]"><MessageCircle className="h-6 w-6" /></span>
+              <div className="min-w-0">
+                <p className="font-heading font-bold leading-tight">Dental Hub Pro</p>
+                <p className="text-xs text-emerald-100">Executive · typically replies in minutes</p>
+              </div>
+              <button data-testid="whatsapp-close" onClick={() => setOpen(false)} className="ml-auto rounded-full p-1 hover:bg-white/10"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="p-4 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-[#e5ddd5] dark:bg-slate-800">
+              <div className="rounded-xl rounded-tl-none bg-white dark:bg-slate-700 p-3 text-sm text-slate-700 dark:text-slate-100 shadow-sm max-w-[85%]">
+                👋 Hi! Chat directly with our executive about jobs, listings, products or clinic design. How can we help?
+              </div>
+            </div>
+            <div className="p-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+              <textarea
+                data-testid="whatsapp-message"
+                value={msg}
+                onChange={(e) => setMsg(e.target.value)}
+                rows={2}
+                placeholder="Type your message…"
+                className="w-full resize-none rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              />
+              <div className="flex items-center gap-2">
+                <button data-testid="whatsapp-send" onClick={openChat} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#20bd5a] transition-colors">
+                  <Send className="h-4 w-4" /> Chat on WhatsApp
+                </button>
+                <a href={`tel:+${PHONE}`} data-testid="whatsapp-call" className="grid place-items-center h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-700 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800" title={DISPLAY}>
+                  <Phone className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <button
+        data-testid="whatsapp-fab"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Chat on WhatsApp"
+        className="group relative grid place-items-center h-14 w-14 rounded-full bg-[#25D366] text-white shadow-lg shadow-[#25D366]/40 hover:scale-105 active:scale-95 transition-transform"
+      >
+        {!open && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#25D366] opacity-40 pointer-events-none" />}
+        {open ? <X className="h-6 w-6 relative" /> : <MessageCircle className="h-7 w-7 relative" />}
+      </button>
+    </div>
+  );
+}

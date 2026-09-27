@@ -21,8 +21,8 @@ export default function Contact() {
         <h1 className="font-heading text-4xl font-extrabold text-slate-900 dark:text-white">Get in touch</h1>
         <p className="mt-3 text-slate-600 dark:text-slate-300">Questions about opportunities, partnerships or listing on the Hub? Send us a message.</p>
         <div className="mt-8 space-y-4">
-          <Item icon={Mail} label="Email" value="hello@dentalhub.in" />
-          <Item icon={MessageCircle} label="WhatsApp" value="+91 90000 00000" />
+          <Item icon={Mail} label="Email" value="info@dentalhubpro.com" />
+          <Item icon={MessageCircle} label="WhatsApp" value="+91-89519 50389" />
           <Item icon={MapPin} label="Base" value="India-first · Expanding globally" />
         </div>
       </div>

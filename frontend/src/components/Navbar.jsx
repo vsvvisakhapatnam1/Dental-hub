@@ -6,7 +6,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, ChevronDown, LayoutDashboard, LogOut, PlusCircle, ShieldCheck } from "lucide-react";
+import { Menu, ChevronDown, LayoutDashboard, LogOut, PlusCircle, ShieldCheck, Mail, Phone } from "lucide-react";
 import { ToothIcon } from "@/components/ToothIcon";
 
 const EXPLORE = [
@@ -19,7 +19,7 @@ const EXPLORE = [
 ];
 
 const NAV = [
-  { label: "Find Opportunities", to: "/opportunities" },
+  { label: "Opportunities", to: "/opportunities" },
   { label: "Dentists", to: "/dentists" },
   { label: "Clinics", to: "/clinics" },
   { label: "Products", to: "/products" },
@@ -39,6 +39,16 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-[hsl(40_43%_98%/0.85)] dark:bg-slate-900/85 border-b border-slate-200/80 dark:border-slate-800">
+      <div className="hidden md:block bg-emerald-900 text-white">
+        <div className="mx-auto max-w-7xl px-4 lg:px-8 h-9 flex items-center justify-end gap-6 text-xs">
+          <a href="mailto:info@dentalhubpro.com" data-testid="topbar-email" className="inline-flex items-center gap-1.5 text-emerald-50 hover:text-white transition-colors">
+            <Mail className="h-3.5 w-3.5" /> info@dentalhubpro.com
+          </a>
+          <a href="tel:+918951950389" data-testid="topbar-phone" className="inline-flex items-center gap-1.5 text-emerald-50 hover:text-white transition-colors">
+            <Phone className="h-3.5 w-3.5" /> +91-89519 50389
+          </a>
+        </div>
+      </div>
       <div className="mx-auto max-w-7xl px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
         <Link to="/" data-testid="nav-logo" className="flex items-center gap-2 shrink-0">
           <span className="grid place-items-center h-9 w-9 rounded-xl bg-emerald-800 text-white">
