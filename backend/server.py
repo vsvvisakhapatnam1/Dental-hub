@@ -16,6 +16,7 @@ import logging
 import secrets
 import bcrypt
 import httpx
+import sheets_sync
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -253,6 +254,7 @@ async def register(payload: RegisterInput, response: Response):
         "created_at": now_utc().isoformat(),
     }
     await db.users.insert_one(doc)
+    await sheets_sync.sync_registration(doc)
     token = await create_session(user_id)
     set_session_cookie(response, token)
     out = clean_user({**doc})

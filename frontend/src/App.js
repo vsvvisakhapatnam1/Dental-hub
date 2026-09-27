@@ -19,6 +19,8 @@ import Dashboard from "@/pages/Dashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
+import Products from "@/pages/Products";
+import ClinicDesign from "@/pages/ClinicDesign";
 import AuthCallback from "@/pages/AuthCallback";
 
 function Shell() {
@@ -41,6 +43,8 @@ function Shell() {
           <Route path="/profile/:id" element={<ProfileView />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/clinic-design" element={<ClinicDesign />} />
           <Route path="/post" element={<ProtectedRoute><PostOpportunity /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />

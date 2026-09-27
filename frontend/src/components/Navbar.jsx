@@ -22,6 +22,8 @@ const NAV = [
   { label: "Find Opportunities", to: "/opportunities" },
   { label: "Dentists", to: "/dentists" },
   { label: "Clinics", to: "/clinics" },
+  { label: "Products", to: "/products" },
+  { label: "Clinic Design", to: "/clinic-design" },
   { label: "About", to: "/about" },
   { label: "Contact", to: "/contact" },
 ];
