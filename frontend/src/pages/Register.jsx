@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import api, { formatApiError } from "@/lib/api";
@@ -40,9 +40,14 @@ function ChipGroup({ options, selected, onToggle, testidPrefix }) {
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [role, setRole] = useState(null); // seeker | giver
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const r = searchParams.get("role");
+    if (r === "seeker" || r === "giver") { setRole(r); setStep(0); }
+  }, [searchParams]);
   const [form, setForm] = useState({
     profile_type: "", multi: [], name: "", email: "", phone: "", city: "", state: "", country: "India",
     address: "", pincode: "", cv_url: "", cv_filename: "",

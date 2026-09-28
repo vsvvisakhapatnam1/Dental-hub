@@ -118,6 +118,20 @@ export default function Home() {
           </div>
 
           <div className="lg:col-span-5">
+            <div className="mb-4 grid grid-cols-2 gap-3">
+              <button data-testid="hero-register-seeker" onClick={() => navigate("/register?role=seeker")}
+                className="group flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-emerald-200 bg-emerald-50/70 dark:bg-emerald-950/20 px-3 py-4 text-center hover:border-emerald-600 hover:shadow-md transition-all">
+                <span className="grid place-items-center h-10 w-10 rounded-xl bg-emerald-800 text-white group-hover:scale-105 transition-transform"><Search className="h-5 w-5" /></span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">I am a Seeker</span>
+                <span className="text-xs text-emerald-800 dark:text-emerald-400 font-medium">Register &amp; find opportunities</span>
+              </button>
+              <button data-testid="hero-register-giver" onClick={() => navigate("/register?role=giver")}
+                className="group flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-amber-200 bg-amber-50/70 dark:bg-amber-950/20 px-3 py-4 text-center hover:border-amber-600 hover:shadow-md transition-all">
+                <span className="grid place-items-center h-10 w-10 rounded-xl bg-amber-600 text-white group-hover:scale-105 transition-transform"><Briefcase className="h-5 w-5" /></span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">I am a Giver</span>
+                <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">Register &amp; post opportunities</span>
+              </button>
+            </div>
             <div className="relative rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl">
               <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?crop=entropy&cs=srgb&fm=jpg&q=85&w=900" alt="Modern dental clinic" className="w-full h-[420px] object-cover" />
               <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-4 flex items-center gap-3">
