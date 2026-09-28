@@ -19,6 +19,10 @@ import httpx
 import sheets_sync
 import storage
 
+STAFF_EMAILS = [e.strip().lower() for e in os.environ.get(
+    "STAFF_EMAILS", "tdvsatishkumar@gmail.com,vsv.visakhapatnam@gmail.com,info@dentalhubpro.com"
+).split(",") if e.strip()]
+
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
@@ -291,6 +295,8 @@ async def register(payload: RegisterInput, response: Response):
 @api_router.post("/auth/login")
 async def login(payload: LoginInput, response: Response):
     email = payload.email.lower().strip()
+    if STAFF_EMAILS and email not in STAFF_EMAILS:
+        raise HTTPException(status_code=403, detail="Login is restricted to authorized Dental Hub Pro team members.")
     user = await db.users.find_one({"email": email})
     if not user or not user.get("password_hash") or not verify_password(payload.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -312,6 +318,8 @@ async def google_session(request: Request, response: Response):
         raise HTTPException(status_code=401, detail="Failed to validate session")
     data = r.json()
     email = data["email"].lower()
+    if STAFF_EMAILS and email not in STAFF_EMAILS:
+        raise HTTPException(status_code=403, detail="Login is restricted to authorized Dental Hub Pro team members.")
     existing = await db.users.find_one({"email": email})
     if existing:
         user_id = existing["id"]

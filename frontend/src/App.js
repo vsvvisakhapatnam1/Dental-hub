@@ -22,6 +22,7 @@ import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import Products from "@/pages/Products";
 import ClinicDesign from "@/pages/ClinicDesign";
+import Team from "@/pages/Team";
 import AuthCallback from "@/pages/AuthCallback";
 
 function Shell() {
@@ -46,6 +47,7 @@ function Shell() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/products" element={<Products />} />
           <Route path="/clinic-design" element={<ClinicDesign />} />
+          <Route path="/team" element={<Team />} />
           <Route path="/post" element={<ProtectedRoute><PostOpportunity /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />

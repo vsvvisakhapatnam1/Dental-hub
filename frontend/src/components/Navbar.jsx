@@ -45,6 +45,7 @@ const NAV_LINKS = [
 ];
 const NAV_END = [
   { label: "About Us", to: "/about" },
+  { label: "Team", to: "/team" },
   { label: "Contact Us", to: "/contact" },
 ];
 
@@ -100,7 +101,7 @@ export function Navbar() {
           </span>
         </Link>
 
-        <nav className="hidden min-[1480px]:flex items-center gap-0.5">
+        <nav className="hidden 2xl:flex items-center gap-0.5">
           <NavDropdown label="Find Opportunities" items={FIND_OPPS} navigate={navigate} />
           {NAV_LINKS.map((n) => (
             <Link key={n.to} to={n.to} data-testid={`nav-${n.label.toLowerCase().replace(/[^a-z]+/g, "-")}`}
@@ -118,7 +119,7 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden min-[1480px]:flex items-center gap-2">
+        <div className="hidden 2xl:flex items-center gap-2">
           <Button data-testid="nav-looking" variant="outline" size="sm" onClick={() => navigate("/opportunities")} className="rounded-full h-9 px-3 border-emerald-700 text-emerald-800 hover:bg-emerald-50 whitespace-nowrap">
             <Search className="h-4 w-4 mr-1" /> Looking For
           </Button>
@@ -149,7 +150,7 @@ export function Navbar() {
 
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <button data-testid="nav-mobile-toggle" className="min-[1480px]:hidden h-10 w-10 grid place-items-center rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800"><Menu className="h-5 w-5" /></button>
+            <button data-testid="nav-mobile-toggle" className="2xl:hidden h-10 w-10 grid place-items-center rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800"><Menu className="h-5 w-5" /></button>
           </SheetTrigger>
           <SheetContent side="right" className="w-80 overflow-y-auto bg-white dark:bg-slate-900">
             <div className="flex flex-col gap-1 mt-8">

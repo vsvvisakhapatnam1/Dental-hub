@@ -2,6 +2,10 @@ import os
 
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "vsv.visakhapatnam@gmail.com")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "DentalHub@2026")
+STAFF_PASSWORD = os.environ.get("STAFF_PASSWORD", "DentalHub@2026")
+STAFF_EMAILS = [e.strip().lower() for e in os.environ.get(
+    "STAFF_EMAILS", "tdvsatishkumar@gmail.com,vsv.visakhapatnam@gmail.com,info@dentalhubpro.com"
+).split(",") if e.strip()]
 
 DEMO_DENTISTS = [
     {"name": "Dr. Priya Nair", "profile_type": "BDS Dentist", "city": "Hyderabad", "state": "Telangana",
@@ -156,6 +160,31 @@ async def seed_all(db, hash_password, default_verification, now_utc):
         from bcrypt import checkpw
         if not admin.get("password_hash") or not checkpw(ADMIN_PASSWORD.encode(), admin["password_hash"].encode()):
             await db.users.update_one({"email": ADMIN_EMAIL}, {"$set": {"password_hash": hash_password(ADMIN_PASSWORD), "role": "admin"}})
+
+    # Staff team accounts (idempotent) — all admins, allowlisted for login
+    for staff_email in STAFF_EMAILS:
+        staff_email = staff_email.lower().strip()
+        if not staff_email:
+            continue
+        existing_staff = await db.users.find_one({"email": staff_email})
+        if not existing_staff:
+            ver = default_verification()
+            ver.update({"mobile": True, "email": True, "organisation": True})
+            await db.users.insert_one({
+                "id": str(uuid.uuid4()), "email": staff_email, "password_hash": hash_password(STAFF_PASSWORD),
+                "auth_provider": "email", "name": staff_email.split("@")[0], "role": "admin", "profile_type": "Team",
+                "phone": None, "city": None, "state": None, "country": "India", "qualification": None,
+                "speciality": None, "experience": None, "skills": [], "looking_for": [], "offering": [],
+                "preferred_type": None, "availability": None, "expected_salary": None, "summary": None,
+                "org_name": "Dental Hub Pro", "contact_person": None, "designation": None, "website": None,
+                "address": None, "specialities": [], "facilities": [], "established": None, "chairs": None,
+                "photo": None, "verification": ver, "is_demo": False, "created_at": ts,
+            })
+        else:
+            from bcrypt import checkpw
+            need = (not existing_staff.get("password_hash")) or (existing_staff.get("role") != "admin")
+            if need:
+                await db.users.update_one({"email": staff_email}, {"$set": {"role": "admin", "password_hash": hash_password(STAFF_PASSWORD)}})
 
     if await db.opportunities.count_documents({"is_demo": True}) > 0:
         return  # demo already seeded

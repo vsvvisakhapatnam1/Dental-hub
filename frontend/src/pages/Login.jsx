@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Stethoscope, Loader2 } from "lucide-react";
+import { Loader2, ShieldCheck } from "lucide-react";
 import { ToothIcon } from "@/components/ToothIcon";
 
 export default function Login() {
@@ -54,6 +54,10 @@ export default function Login() {
           </Link>
           <h1 className="font-heading text-3xl font-bold text-slate-900 dark:text-white">Welcome back</h1>
           <p className="mt-1 text-slate-500">Log in to your account</p>
+          <div className="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 px-3 py-2 text-xs text-amber-800 dark:text-amber-300" data-testid="login-staff-note">
+            <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0" />
+            <span>Login is for authorized <strong>Dental Hub Pro</strong> team members only. Seekers &amp; Givers should use <Link to="/register" className="underline font-semibold">Register</Link>.</span>
+          </div>
 
           <div className="mt-6 space-y-4">
             <div>
