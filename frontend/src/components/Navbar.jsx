@@ -53,8 +53,8 @@ function NavDropdown({ label, items, navigate }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button data-testid={`nav-${slug}`} className="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">
-          {label} <ChevronDown className="h-4 w-4" />
+        <button data-testid={`nav-${slug}`} className="inline-flex items-center gap-1 px-2 py-2 rounded-lg text-[13px] font-medium text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">
+          {label} <ChevronDown className="h-3.5 w-3.5" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-60 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl">
@@ -80,7 +80,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-[hsl(40_43%_98%/0.85)] dark:bg-slate-900/85 border-b border-slate-200/80 dark:border-slate-800">
       <div className="hidden md:block bg-emerald-900 text-white">
-        <div className="mx-auto max-w-7xl px-4 lg:px-8 h-9 flex items-center justify-end gap-6 text-xs">
+        <div className="mx-auto w-full max-w-[1600px] px-4 lg:px-6 h-9 flex items-center justify-end gap-6 text-xs">
           <a href="mailto:info@dentalhubpro.com" data-testid="topbar-email" className="inline-flex items-center gap-1.5 text-emerald-50 hover:text-white transition-colors">
             <Mail className="h-3.5 w-3.5" /> info@dentalhubpro.com
           </a>
@@ -90,7 +90,7 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 lg:px-8 h-16 flex items-center justify-between gap-3">
+      <div className="mx-auto w-full max-w-[1600px] px-4 lg:px-6 h-16 flex items-center justify-between gap-3">
         <Link to="/" data-testid="nav-logo" className="flex items-center gap-2 shrink-0">
           <span className="grid place-items-center h-9 w-9 rounded-xl bg-emerald-800 text-white">
             <ToothIcon className="h-5 w-5" />
@@ -100,11 +100,11 @@ export function Navbar() {
           </span>
         </Link>
 
-        <nav className="hidden xl:flex items-center gap-0.5">
+        <nav className="hidden min-[1480px]:flex items-center gap-0.5">
           <NavDropdown label="Find Opportunities" items={FIND_OPPS} navigate={navigate} />
           {NAV_LINKS.map((n) => (
             <Link key={n.to} to={n.to} data-testid={`nav-${n.label.toLowerCase().replace(/[^a-z]+/g, "-")}`}
-              className="px-2.5 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">
+              className="px-2 py-2 rounded-lg text-[13px] font-medium text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">
               {n.label}
             </Link>
           ))}
@@ -112,18 +112,18 @@ export function Navbar() {
           <NavDropdown label="Clinic Setup" items={CLINIC_SETUP} navigate={navigate} />
           {NAV_END.map((n) => (
             <Link key={n.to} to={n.to} data-testid={`nav-${n.label.toLowerCase().replace(/[^a-z]+/g, "-")}`}
-              className="px-2.5 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">
+              className="px-2 py-2 rounded-lg text-[13px] font-medium text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">
               {n.label}
             </Link>
           ))}
         </nav>
 
-        <div className="hidden xl:flex items-center gap-2">
-          <Button data-testid="nav-looking" variant="outline" onClick={() => navigate("/opportunities")} className="rounded-full border-emerald-700 text-emerald-800 hover:bg-emerald-50">
-            <Search className="h-4 w-4 mr-1" /> I'm Looking For
+        <div className="hidden min-[1480px]:flex items-center gap-2">
+          <Button data-testid="nav-looking" variant="outline" size="sm" onClick={() => navigate("/opportunities")} className="rounded-full h-9 px-3 border-emerald-700 text-emerald-800 hover:bg-emerald-50 whitespace-nowrap">
+            <Search className="h-4 w-4 mr-1" /> Looking For
           </Button>
-          <Button data-testid="nav-post-opportunity" onClick={() => navigate("/post")} className="rounded-full bg-amber-600 hover:bg-amber-700 text-white">
-            <PlusCircle className="h-4 w-4 mr-1" /> Post an Opportunity
+          <Button data-testid="nav-post-opportunity" size="sm" onClick={() => navigate("/post")} className="rounded-full h-9 px-3 bg-amber-600 hover:bg-amber-700 text-white whitespace-nowrap">
+            <PlusCircle className="h-4 w-4 mr-1" /> Post Opportunity
           </Button>
           {user ? (
             <DropdownMenu>
@@ -143,13 +143,13 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button data-testid="nav-login" variant="ghost" onClick={() => navigate("/login")} className="rounded-full">Login</Button>
+            <Button data-testid="nav-login" variant="ghost" size="sm" onClick={() => navigate("/login")} className="rounded-full px-3">Login</Button>
           )}
         </div>
 
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <button data-testid="nav-mobile-toggle" className="xl:hidden h-10 w-10 grid place-items-center rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800"><Menu className="h-5 w-5" /></button>
+            <button data-testid="nav-mobile-toggle" className="min-[1480px]:hidden h-10 w-10 grid place-items-center rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800"><Menu className="h-5 w-5" /></button>
           </SheetTrigger>
           <SheetContent side="right" className="w-80 overflow-y-auto bg-white dark:bg-slate-900">
             <div className="flex flex-col gap-1 mt-8">
