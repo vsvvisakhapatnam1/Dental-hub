@@ -23,6 +23,9 @@ import Contact from "@/pages/Contact";
 import Products from "@/pages/Products";
 import ClinicDesign from "@/pages/ClinicDesign";
 import Team from "@/pages/Team";
+import Pricing from "@/pages/Pricing";
+import PaymentSuccess from "@/pages/PaymentSuccess";
+import PaymentCancel from "@/pages/PaymentCancel";
 import AuthCallback from "@/pages/AuthCallback";
 
 function Shell() {
@@ -48,6 +51,9 @@ function Shell() {
           <Route path="/products" element={<Products />} />
           <Route path="/clinic-design" element={<ClinicDesign />} />
           <Route path="/team" element={<Team />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/cancel" element={<PaymentCancel />} />
           <Route path="/post" element={<ProtectedRoute><PostOpportunity /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
