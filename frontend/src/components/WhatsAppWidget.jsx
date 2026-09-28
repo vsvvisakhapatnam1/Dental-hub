@@ -1,18 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Phone, Send } from "lucide-react";
 
 const PHONE = "918951950389";
 const DISPLAY = "+91-89519 50389";
+const AVATAR = "https://static.prod-images.emergentagent.com/jobs/44036ef2-8e8a-4b54-af78-efd0b0e3f36e/images/6c0412e158797332c8466a5ae51761307b0608b9e356974ef142b6932902cfab.jpeg";
 
 export function WhatsAppWidget() {
   const [open, setOpen] = useState(false);
+  const [greeting, setGreeting] = useState(false);
   const [msg, setMsg] = useState("");
+
+  useEffect(() => {
+    const t = setTimeout(() => setGreeting(true), 1800);
+    return () => clearTimeout(t);
+  }, []);
 
   const openChat = () => {
     const text = encodeURIComponent(msg || "Hi Dental Hub Pro, I'd like to know more about your platform.");
     window.open(`https://wa.me/${PHONE}?text=${text}`, "_blank", "noopener,noreferrer");
   };
+
+  const toggle = () => { setGreeting(false); setOpen((v) => !v); };
 
   return (
     <div className="fixed bottom-24 right-5 z-[60] flex flex-col items-end gap-3">
@@ -27,16 +36,16 @@ export function WhatsAppWidget() {
             className="w-80 max-w-[calc(100vw-2.5rem)] overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl"
           >
             <div className="bg-[#075E54] p-4 text-white flex items-center gap-3">
-              <span className="grid place-items-center h-11 w-11 rounded-full bg-[#25D366]"><MessageCircle className="h-6 w-6" /></span>
+              <img src={AVATAR} alt="Assistant" className="h-11 w-11 rounded-full object-cover ring-2 ring-white/40" />
               <div className="min-w-0">
                 <p className="font-heading font-bold leading-tight">Dental Hub Pro</p>
-                <p className="text-xs text-emerald-100">Executive · typically replies in minutes</p>
+                <p className="text-xs text-emerald-100 flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-[#25D366]" /> Assistant · replies in minutes</p>
               </div>
               <button data-testid="whatsapp-close" onClick={() => setOpen(false)} className="ml-auto rounded-full p-1 hover:bg-white/10"><X className="h-4 w-4" /></button>
             </div>
             <div className="p-4 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-[#e5ddd5] dark:bg-slate-800">
               <div className="rounded-xl rounded-tl-none bg-white dark:bg-slate-700 p-3 text-sm text-slate-700 dark:text-slate-100 shadow-sm max-w-[85%]">
-                👋 Hi! Chat directly with our executive about jobs, listings, products or clinic design. How can we help?
+                👋 Hello! How can I help? Ask me about jobs, listings, products or clinic design.
               </div>
             </div>
             <div className="p-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
@@ -61,14 +70,42 @@ export function WhatsAppWidget() {
         )}
       </AnimatePresence>
 
+      {/* Greeting speech bubble */}
+      <AnimatePresence>
+        {greeting && !open && (
+          <motion.div
+            initial={{ opacity: 0, x: 12, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 12, scale: 0.9 }}
+            data-testid="whatsapp-greeting"
+            className="relative mr-1 max-w-[220px] rounded-2xl rounded-br-none bg-white dark:bg-slate-800 px-4 py-3 shadow-xl border border-slate-100 dark:border-slate-700"
+          >
+            <button data-testid="whatsapp-greeting-close" onClick={() => setGreeting(false)} className="absolute -top-2 -left-2 grid place-items-center h-5 w-5 rounded-full bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-300"><X className="h-3 w-3" /></button>
+            <p className="text-sm font-semibold text-slate-800 dark:text-white leading-snug">Hello! 👋</p>
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-snug">How can I help you today?</p>
+            <span className="absolute -bottom-2 right-4 h-4 w-4 rotate-45 bg-white dark:bg-slate-800 border-b border-r border-slate-100 dark:border-slate-700" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Avatar button */}
       <button
         data-testid="whatsapp-fab"
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Chat on WhatsApp"
-        className="group relative grid place-items-center h-14 w-14 rounded-full bg-[#25D366] text-white shadow-lg shadow-[#25D366]/40 hover:scale-105 active:scale-95 transition-transform"
+        onClick={toggle}
+        aria-label="Chat with our assistant"
+        className="group relative h-16 w-16 rounded-full shadow-lg shadow-emerald-600/30 hover:scale-105 active:scale-95 transition-transform"
       >
-        {!open && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#25D366] opacity-40 pointer-events-none" />}
-        {open ? <X className="h-6 w-6 relative" /> : <MessageCircle className="h-7 w-7 relative" />}
+        {!open && greeting === false && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-30 pointer-events-none" />}
+        {open ? (
+          <span className="grid h-16 w-16 place-items-center rounded-full bg-emerald-800 text-white"><X className="h-6 w-6" /></span>
+        ) : (
+          <>
+            <img src={AVATAR} alt="Chat assistant" className="h-16 w-16 rounded-full object-cover ring-2 ring-white" />
+            <span className="absolute -bottom-0.5 -right-0.5 grid h-7 w-7 place-items-center rounded-full bg-[#25D366] ring-2 ring-white">
+              <MessageCircle className="h-4 w-4 text-white" />
+            </span>
+          </>
+        )}
       </button>
     </div>
   );
