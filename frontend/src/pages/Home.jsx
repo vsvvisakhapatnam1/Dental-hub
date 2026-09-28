@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SPECIALITIES, CITIES } from "@/lib/constants";
 import {
   Search, Briefcase, Building2, Users, GraduationCap, Globe2, Wrench, PlusCircle,
-  Stethoscope, ArrowRight, ShieldCheck, HeartHandshake, BadgeCheck,
+  ArrowRight, ShieldCheck, HeartHandshake, BadgeCheck,
 } from "lucide-react";
+import { ToothIcon } from "@/components/ToothIcon";
 
 const LOOKING_QUICK = ["Job", "Clinic Space", "Practice Partner", "Course", "MDS Admission", "Abroad Opportunity", "Dental Service", "Practice Partnership"];
 const OFFERING_QUICK = ["Dentist Job", "Associate Dentist", "Clinic Space", "Practice Partnership", "MDS Opportunity", "Course", "Dental Service", "Equipment"];
@@ -63,7 +64,7 @@ export default function Home() {
         <div className="relative mx-auto max-w-7xl px-4 lg:px-8 pt-16 pb-14 grid lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7">
             <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 text-emerald-800 px-3 py-1 text-xs font-semibold">
-              <Stethoscope className="h-3.5 w-3.5" /> India's Dental Opportunity Marketplace
+              <ToothIcon className="h-3.5 w-3.5" /> India's Dental Opportunity Marketplace
             </span>
             <h1 className="mt-5 font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-slate-900 dark:text-white">
               One Platform.<br /><span className="text-emerald-800 dark:text-emerald-400">Every Dental</span> <span className="text-amber-600">Opportunity.</span>
