@@ -5,7 +5,7 @@ import os
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, Query
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, Query, UploadFile, File, Header
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr
@@ -17,6 +17,7 @@ import secrets
 import bcrypt
 import httpx
 import sheets_sync
+import storage
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -127,12 +128,16 @@ class RegisterInput(BaseModel):
     city: Optional[str] = None
     state: Optional[str] = None
     country: Optional[str] = "India"
+    pincode: Optional[str] = None
+    cv_url: Optional[str] = None
+    cv_filename: Optional[str] = None
     qualification: Optional[str] = None
     speciality: Optional[str] = None
     experience: Optional[str] = None
     looking_for: List[str] = Field(default_factory=list)
     offering: List[str] = Field(default_factory=list)
     preferred_type: Optional[str] = None
+    preferred_location: Optional[str] = None
     availability: Optional[str] = None
     expected_salary: Optional[str] = None
     summary: Optional[str] = None
@@ -159,6 +164,9 @@ class ProfileUpdate(BaseModel):
     city: Optional[str] = None
     state: Optional[str] = None
     country: Optional[str] = None
+    pincode: Optional[str] = None
+    cv_url: Optional[str] = None
+    cv_filename: Optional[str] = None
     qualification: Optional[str] = None
     speciality: Optional[str] = None
     experience: Optional[str] = None
@@ -166,6 +174,7 @@ class ProfileUpdate(BaseModel):
     looking_for: Optional[List[str]] = None
     offering: Optional[List[str]] = None
     preferred_type: Optional[str] = None
+    preferred_location: Optional[str] = None
     availability: Optional[str] = None
     expected_salary: Optional[str] = None
     summary: Optional[str] = None
@@ -214,6 +223,19 @@ async def register(payload: RegisterInput, response: Response):
         raise HTTPException(status_code=400, detail="Email already registered")
     if payload.role not in ("seeker", "giver"):
         raise HTTPException(status_code=400, detail="Invalid role")
+    _missing = [lbl for lbl, val in (
+        ("Name", payload.name), ("Email", email), ("Phone Number", payload.phone),
+        ("City", payload.city), ("Preferred Location", payload.preferred_location),
+    ) if not (val and str(val).strip())]
+    if payload.role == "seeker":
+        for lbl, val in (("Resume/CV", payload.cv_url), ("Address", payload.address), ("Pincode", payload.pincode)):
+            if not (val and str(val).strip()):
+                _missing.append(lbl)
+    if payload.role == "giver":
+        if not (payload.address and payload.address.strip()):
+            _missing.append("Address")
+    if _missing:
+        raise HTTPException(status_code=400, detail="Required fields missing: " + ", ".join(_missing))
     user_id = str(uuid.uuid4())
     verification = default_verification()
     verification["email"] = True  # email set at registration (demo)
@@ -229,6 +251,9 @@ async def register(payload: RegisterInput, response: Response):
         "city": payload.city,
         "state": payload.state,
         "country": payload.country or "India",
+        "pincode": payload.pincode,
+        "cv_url": payload.cv_url,
+        "cv_filename": payload.cv_filename,
         "qualification": payload.qualification,
         "speciality": payload.speciality,
         "experience": payload.experience,
@@ -236,6 +261,7 @@ async def register(payload: RegisterInput, response: Response):
         "looking_for": payload.looking_for,
         "offering": payload.offering,
         "preferred_type": payload.preferred_type,
+        "preferred_location": payload.preferred_location,
         "availability": payload.availability,
         "expected_salary": payload.expected_salary,
         "summary": payload.summary,
@@ -595,6 +621,52 @@ async def root():
     return {"message": "Dental Opportunity Hub API"}
 
 
+@api_router.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else "bin"
+    allowed = {"pdf", "doc", "docx", "png", "jpg", "jpeg", "webp", "txt"}
+    if ext not in allowed:
+        raise HTTPException(status_code=400, detail="Unsupported file type. Allowed: PDF, DOC, DOCX, PNG, JPG.")
+    data = await file.read()
+    if len(data) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large (max 10MB).")
+    file_id = str(uuid.uuid4())
+    path = f"{storage.APP_NAME}/uploads/{file_id}.{ext}"
+    content_type = file.content_type or storage.mime_for(file.filename)
+    try:
+        result = storage.put_object(path, data, content_type)
+    except Exception:
+        raise HTTPException(status_code=502, detail="Upload failed. Please try again.")
+    stored_path = result.get("path", path)
+    await db.files.insert_one({
+        "id": file_id,
+        "storage_path": stored_path,
+        "original_filename": file.filename,
+        "content_type": content_type,
+        "size": result.get("size", len(data)),
+        "is_deleted": False,
+        "created_at": now_utc().isoformat(),
+    })
+    return {"id": file_id, "path": stored_path, "url": f"/api/files/{file_id}", "filename": file.filename}
+
+
+@api_router.get("/files/{file_id}")
+async def download_file(file_id: str):
+    record = await db.files.find_one({"id": file_id, "is_deleted": False})
+    if not record:
+        raise HTTPException(status_code=404, detail="File not found")
+    try:
+        data, content_type = storage.get_object(record["storage_path"])
+    except Exception:
+        raise HTTPException(status_code=502, detail="Could not retrieve file")
+    fname = record.get("original_filename", "file")
+    return Response(
+        content=data,
+        media_type=record.get("content_type", content_type),
+        headers={"Content-Disposition": f'inline; filename="{fname}"'},
+    )
+
+
 app.include_router(api_router)
 
 app.add_middleware(
@@ -612,6 +684,11 @@ from seed_data import seed_all  # noqa: E402
 
 @app.on_event("startup")
 async def startup():
+    try:
+        storage.init_storage()
+        logger.info("Object storage initialized")
+    except Exception as e:
+        logger.error(f"Storage init failed: {e}")
     await db.users.create_index("email", unique=True)
     await db.users.create_index("id", unique=True)
     await db.user_sessions.create_index("session_token", unique=True)

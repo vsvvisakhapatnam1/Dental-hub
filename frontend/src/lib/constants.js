@@ -57,3 +57,5 @@ export const VERIFICATION_LEVELS = [
   { key: "clinic", label: "Clinic Verified" },
   { key: "organisation", label: "Organisation Verified" },
 ];
+
+export const PREFERRED_LOCATIONS = [...CITIES, "Anywhere in India", "Abroad"];

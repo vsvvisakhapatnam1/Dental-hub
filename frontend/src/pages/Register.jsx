@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
-import { formatApiError } from "@/lib/api";
+import api, { formatApiError } from "@/lib/api";
+import { CvUpload } from "@/components/CvUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +17,7 @@ import {
 import { ToothIcon } from "@/components/ToothIcon";
 import {
   LOOKING_CATEGORIES, OFFERING_CATEGORIES, SPECIALITIES, QUALIFICATIONS, EXPERIENCE_LEVELS,
-  EMPLOYMENT_TYPES, AVAILABILITY, STATES, CITIES, SEEKER_PROFILE_TYPES, GIVER_PROFILE_TYPES,
+  EMPLOYMENT_TYPES, AVAILABILITY, STATES, CITIES, SEEKER_PROFILE_TYPES, GIVER_PROFILE_TYPES, PREFERRED_LOCATIONS,
 } from "@/lib/constants";
 
 function ChipGroup({ options, selected, onToggle, testidPrefix }) {
@@ -44,7 +45,8 @@ export default function Register() {
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     profile_type: "", multi: [], name: "", email: "", phone: "", city: "", state: "", country: "India",
-    qualification: "", speciality: "", experience: "", preferred_type: "", availability: "", expected_salary: "",
+    address: "", pincode: "", cv_url: "", cv_filename: "",
+    qualification: "", speciality: "", experience: "", preferred_type: "", preferred_location: "", availability: "", expected_salary: "",
     summary: "", org_name: "", contact_person: "", designation: "", website: "", address: "",
     specialities: [], facilities_text: "", established: "", chairs: "", password: "", confirm: "", agree: false,
   });
@@ -56,10 +58,33 @@ export default function Register() {
     ? ["Who are you?", "What are you looking for?", "Professional info", "Preferences", "Create account"]
     : ["What are you offering?", "What to offer?", "Organisation info", "Details", "Create account"];
 
-  const next = () => setStep((s) => Math.min(s + 1, steps.length - 1));
+  const validateBeforeNext = () => {
+    if (step === 2) {
+      if (role === "seeker" && !form.name.trim()) { toast.error("Name is required"); return false; }
+      if (!form.email.trim()) { toast.error("Email is required"); return false; }
+      if (!form.phone.trim()) { toast.error("Phone Number is required"); return false; }
+      if (!form.city) { toast.error("City is required"); return false; }
+      if (!form.address.trim()) { toast.error("Address is required"); return false; }
+      if (role === "seeker" && !form.pincode.trim()) { toast.error("Pincode is required"); return false; }
+      if (role === "seeker" && !form.cv_url) { toast.error("Please upload your Resume / CV"); return false; }
+    }
+    if (step === 3 && !form.preferred_location) { toast.error("Preferred Location is required"); return false; }
+    return true;
+  };
+  const next = () => { if (!validateBeforeNext()) return; setStep((s) => Math.min(s + 1, steps.length - 1)); };
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const submit = async () => {
+    const miss = [];
+    if (!form.name.trim()) miss.push("Name");
+    if (!form.email.trim()) miss.push("Email");
+    if (!form.phone.trim()) miss.push("Phone Number");
+    if (!form.city) miss.push("City");
+    if (!form.preferred_location) miss.push("Preferred Location");
+    if (!form.address.trim()) miss.push("Address");
+    if (role === "seeker" && !form.pincode.trim()) miss.push("Pincode");
+    if (role === "seeker" && !form.cv_url) miss.push("Resume/CV");
+    if (miss.length) { toast.error("Please fill required fields: " + miss.join(", ")); return; }
     if (!form.agree) { toast.error("Please accept the Terms & Privacy Policy"); return; }
     if (form.password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
     if (form.password !== form.confirm) { toast.error("Passwords do not match"); return; }
@@ -68,8 +93,9 @@ export default function Register() {
       const payload = {
         email: form.email, password: form.password, name: form.name, role,
         profile_type: form.profile_type, phone: form.phone, city: form.city, state: form.state, country: form.country,
+        address: form.address, pincode: form.pincode, cv_url: form.cv_url, cv_filename: form.cv_filename,
         qualification: form.qualification, speciality: form.speciality, experience: form.experience,
-        preferred_type: form.preferred_type, availability: form.availability, expected_salary: form.expected_salary,
+        preferred_type: form.preferred_type, preferred_location: form.preferred_location, availability: form.availability, expected_salary: form.expected_salary,
         summary: form.summary,
         looking_for: role === "seeker" ? form.multi : [],
         offering: role === "giver" ? form.multi : [],
@@ -156,14 +182,19 @@ export default function Register() {
 
         {step === 2 && role === "seeker" && (
           <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="Full Name" testid="reg-name"><Input value={form.name} onChange={(e) => set("name", e.target.value)} className="rounded-xl" /></Field>
-            <Field label="Mobile Number" testid="reg-phone"><Input value={form.phone} onChange={(e) => set("phone", e.target.value)} className="rounded-xl" /></Field>
-            <Field label="Email" testid="reg-email"><Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className="rounded-xl" /></Field>
+            <Field label="Full Name" testid="reg-name" required><Input value={form.name} onChange={(e) => set("name", e.target.value)} className="rounded-xl" /></Field>
+            <Field label="Mobile Number" testid="reg-phone" required><Input value={form.phone} onChange={(e) => set("phone", e.target.value)} className="rounded-xl" /></Field>
+            <Field label="Email" testid="reg-email" required><Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className="rounded-xl" /></Field>
             <SelectField label="Qualification" value={form.qualification} onChange={(v) => set("qualification", v)} options={QUALIFICATIONS} testid="reg-qualification" />
             <SelectField label="Speciality" value={form.speciality} onChange={(v) => set("speciality", v)} options={SPECIALITIES} testid="reg-speciality" />
             <SelectField label="Experience" value={form.experience} onChange={(v) => set("experience", v)} options={EXPERIENCE_LEVELS} testid="reg-experience" />
-            <SelectField label="City" value={form.city} onChange={(v) => set("city", v)} options={CITIES} testid="reg-city" />
+            <SelectField label="City" value={form.city} onChange={(v) => set("city", v)} options={CITIES} testid="reg-city" required />
             <SelectField label="State" value={form.state} onChange={(v) => set("state", v)} options={STATES} testid="reg-state" />
+            <div className="sm:col-span-2"><Field label="Address" testid="reg-address" required><Input value={form.address} onChange={(e) => set("address", e.target.value)} className="rounded-xl" placeholder="House / street / area" /></Field></div>
+            <Field label="Pincode" testid="reg-pincode" required><Input value={form.pincode} onChange={(e) => set("pincode", e.target.value)} className="rounded-xl" placeholder="e.g. 500001" /></Field>
+            <div className="sm:col-span-2">
+              <CvUpload value={form.cv_url} filename={form.cv_filename} required onChange={(url, name) => setForm((f) => ({ ...f, cv_url: url, cv_filename: name }))} />
+            </div>
           </div>
         )}
 
@@ -172,27 +203,30 @@ export default function Register() {
             <Field label="Organisation / Clinic Name" testid="reg-org"><Input value={form.org_name} onChange={(e) => set("org_name", e.target.value)} className="rounded-xl" /></Field>
             <Field label="Contact Person" testid="reg-contact"><Input value={form.contact_person} onChange={(e) => set("contact_person", e.target.value)} className="rounded-xl" /></Field>
             <Field label="Designation" testid="reg-designation"><Input value={form.designation} onChange={(e) => set("designation", e.target.value)} className="rounded-xl" /></Field>
-            <Field label="Mobile Number" testid="reg-phone"><Input value={form.phone} onChange={(e) => set("phone", e.target.value)} className="rounded-xl" /></Field>
-            <Field label="Email" testid="reg-email"><Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className="rounded-xl" /></Field>
+            <Field label="Mobile Number" testid="reg-phone" required><Input value={form.phone} onChange={(e) => set("phone", e.target.value)} className="rounded-xl" /></Field>
+            <Field label="Email" testid="reg-email" required><Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className="rounded-xl" /></Field>
             <Field label="Website (optional)" testid="reg-website"><Input value={form.website} onChange={(e) => set("website", e.target.value)} className="rounded-xl" /></Field>
-            <SelectField label="City" value={form.city} onChange={(v) => set("city", v)} options={CITIES} testid="reg-city" />
+            <SelectField label="City" value={form.city} onChange={(v) => set("city", v)} options={CITIES} testid="reg-city" required />
             <SelectField label="State" value={form.state} onChange={(v) => set("state", v)} options={STATES} testid="reg-state" />
-            <div className="sm:col-span-2"><Field label="Full Address" testid="reg-address"><Input value={form.address} onChange={(e) => set("address", e.target.value)} className="rounded-xl" /></Field></div>
+            <div className="sm:col-span-2"><Field label="Full Address" testid="reg-address" required><Input value={form.address} onChange={(e) => set("address", e.target.value)} className="rounded-xl" placeholder="Clinic street / area / landmark" /></Field></div>
           </div>
         )}
 
         {step === 3 && role === "seeker" && (
           <div className="grid sm:grid-cols-2 gap-4">
             <SelectField label="Preferred Opportunity Type" value={form.preferred_type} onChange={(v) => set("preferred_type", v)} options={EMPLOYMENT_TYPES} testid="reg-preferred" />
+            <SelectField label="Preferred Location" value={form.preferred_location} onChange={(v) => set("preferred_location", v)} options={PREFERRED_LOCATIONS} testid="reg-preferred-location" required />
             <SelectField label="Availability" value={form.availability} onChange={(v) => set("availability", v)} options={AVAILABILITY} testid="reg-availability" />
             <Field label="Expected Salary / Fee (optional)" testid="reg-salary"><Input value={form.expected_salary} onChange={(e) => set("expected_salary", e.target.value)} className="rounded-xl" placeholder="e.g. ₹40,000/month" /></Field>
-            <SelectField label="Name (name)" value={form.profile_type} onChange={() => {}} options={[]} hidden />
             <div className="sm:col-span-2"><Field label="Professional Summary" testid="reg-summary"><Textarea value={form.summary} onChange={(e) => set("summary", e.target.value)} className="rounded-xl" rows={3} placeholder="Tell clinics about yourself…" /></Field></div>
           </div>
         )}
 
         {step === 3 && role === "giver" && (
           <div className="space-y-4">
+            <div className="sm:max-w-sm">
+              <SelectField label="Preferred Location" value={form.preferred_location} onChange={(v) => set("preferred_location", v)} options={PREFERRED_LOCATIONS} testid="reg-preferred-location" required />
+            </div>
             <div>
               <Label className="mb-2 block">Clinic Specialities</Label>
               <ChipGroup options={SPECIALITIES} selected={form.specialities} onToggle={(v) => toggle("specialities", v)} testidPrefix="cspec" />
@@ -209,7 +243,7 @@ export default function Register() {
         {step === 4 && (
           <div className="space-y-4">
             {role === "giver" && (
-              <Field label="Full Name (contact)" testid="reg-name"><Input value={form.name} onChange={(e) => set("name", e.target.value)} className="rounded-xl" /></Field>
+              <Field label="Full Name (contact)" testid="reg-name" required><Input value={form.name} onChange={(e) => set("name", e.target.value)} className="rounded-xl" /></Field>
             )}
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Password" testid="reg-password"><Input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} className="rounded-xl" /></Field>
@@ -237,20 +271,20 @@ export default function Register() {
   );
 }
 
-function Field({ label, children, testid }) {
+function Field({ label, children, testid, required }) {
   return (
     <div data-testid={testid}>
-      <Label className="mb-1.5 block">{label}</Label>
+      <Label className="mb-1.5 block">{label}{required && <span className="text-red-500"> *</span>}</Label>
       {children}
     </div>
   );
 }
 
-function SelectField({ label, value, onChange, options, testid, hidden }) {
+function SelectField({ label, value, onChange, options, testid, hidden, required }) {
   if (hidden) return null;
   return (
     <div>
-      <Label className="mb-1.5 block">{label}</Label>
+      <Label className="mb-1.5 block">{label}{required && <span className="text-red-500"> *</span>}</Label>
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger data-testid={testid} className="rounded-xl"><SelectValue placeholder={`Select ${label.toLowerCase()}`} /></SelectTrigger>
         <SelectContent className="bg-white dark:bg-slate-900 max-h-64">{options.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>

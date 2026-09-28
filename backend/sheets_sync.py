@@ -19,12 +19,12 @@ GIVER_TAB = "Giver list"
 
 SEEKER_HEADERS = [
     "Registered At", "Name", "Email", "Phone", "Profile Type", "Qualification",
-    "Speciality", "Experience", "City", "State", "Country", "Looking For",
-    "Preferred Type", "Availability", "Expected Salary", "Summary",
+    "Speciality", "Experience", "City", "State", "Country", "Pincode", "Address", "Preferred Location", "Looking For",
+    "Preferred Type", "Availability", "Expected Salary", "Resume/CV", "Summary",
 ]
 GIVER_HEADERS = [
     "Registered At", "Organisation / Name", "Contact Person", "Designation", "Email",
-    "Phone", "Website", "City", "State", "Country", "Address", "Offering",
+    "Phone", "Website", "City", "State", "Country", "Preferred Location", "Address", "Offering",
     "Specialities", "Facilities", "Established", "Chairs", "Summary",
 ]
 
@@ -59,7 +59,7 @@ def _row_from_user(user: dict, is_giver: bool):
             user.get("created_at", ""), user.get("org_name") or user.get("name", ""),
             user.get("contact_person", ""), user.get("designation", ""), user.get("email", ""),
             user.get("phone", ""), user.get("website", ""), user.get("city", ""),
-            user.get("state", ""), user.get("country", ""), user.get("address", ""),
+            user.get("state", ""), user.get("country", ""), user.get("preferred_location", ""), user.get("address", ""),
             j(user.get("offering")), j(user.get("specialities")), j(user.get("facilities")),
             str(user.get("established") or ""), str(user.get("chairs") or ""), user.get("summary", ""),
         ]
@@ -67,9 +67,10 @@ def _row_from_user(user: dict, is_giver: bool):
         user.get("created_at", ""), user.get("name", ""), user.get("email", ""),
         user.get("phone", ""), user.get("profile_type", ""), user.get("qualification", ""),
         user.get("speciality", ""), user.get("experience", ""), user.get("city", ""),
-        user.get("state", ""), user.get("country", ""), j(user.get("looking_for")),
+        user.get("state", ""), user.get("country", ""), user.get("pincode", ""), user.get("address", ""),
+        user.get("preferred_location", ""), j(user.get("looking_for")),
         user.get("preferred_type", ""), user.get("availability", ""),
-        str(user.get("expected_salary") or ""), user.get("summary", ""),
+        str(user.get("expected_salary") or ""), user.get("cv_filename", ""), user.get("summary", ""),
     ]
 
 
