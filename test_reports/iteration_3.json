@@ -1,0 +1,43 @@
+{
+  "summary": "Verified Emergent-managed Google sign-in integration end-to-end for Dental Hub Pro. Added /app/backend/tests/test_google_auth.py (8 tests, 100% pass) covering: POST /api/auth/google/session (400 missing X-Session-ID, 401 invalid session), STAFF_EMAILS allowlist code-path at server.py:322, session management per /app/auth_testing.md (user+user_sessions injection in Mongo, Bearer + cookie auth on /api/auth/me, invalid Bearer -> 401), staff login (vsv.visakhapatnam@gmail.com / DentalHub@2026 -> role=admin + session_token) and logout invalidation (POST /auth/logout then /auth/me -> 401), non-staff login 403. Frontend: /login renders [data-testid=login-google] 'Continue with Google'; clicking it triggers window.location to https://auth.emergentagent.com/?redirect=<origin>%2Fdashboard (verified via code at Login.jsx:35-36 and observed redirect chain terminating at accounts.google.com with redirect_uri=demobackend.emergentagent.com/auth/v1/env/oauth/callback). Visiting /dashboard#session_id=fake123 mounts AuthCallback (shows 'Signing you in…' spinner), attempts POST /auth/google/session (401 as expected), and cleanly redirects to /login — no crash/white-screen (login page re-rendered, confirmed by screenshot).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_google_auth.py",
+    "/app/test_reports/pytest/google_auth_results.xml"
+  ],
+  "pytest_results": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "detail": {
+      "TestGoogleSessionEndpoint::test_missing_x_session_id_returns_400": "PASSED (400 'Missing session id')",
+      "TestGoogleSessionEndpoint::test_invalid_session_id_returns_401": "PASSED (401 'Failed to validate session' when EMERGENT_SESSION_URL returns non-200)",
+      "TestGoogleSessionEndpoint::test_staff_gate_code_path_exists": "PASSED (STAFF_EMAILS + 403 'team members' present in google_session handler ~line 322)",
+      "TestSessionInjection::test_bearer_auth_me": "PASSED (Mongo-injected user+session_token works with Authorization: Bearer, _id and password_hash excluded)",
+      "TestSessionInjection::test_cookie_auth_me": "PASSED (same token works via httpOnly cookie session_token)",
+      "TestSessionInjection::test_invalid_bearer_token_401": "PASSED",
+      "TestStaffLoginLogout::test_staff_login_and_logout_invalidates": "PASSED (admin login -> role=admin + session_token; /auth/me OK; /auth/logout; /auth/me -> 401)",
+      "TestStaffLoginLogout::test_non_staff_login_rejected": "PASSED (403 'team members')"
+    }
+  },
+  "ui_smoke": {
+    "login_page": "[data-testid=login-google] present with text 'Continue with Google'; staff-only amber banner [data-testid=login-staff-note] visible",
+    "google_button_click": "Browser navigates to https://auth.emergentagent.com/?redirect=<origin>%2Fdashboard (chain ends at accounts.google.com with redirect_uri=demobackend.emergentagent.com/auth/v1/env/oauth/callback as expected by Emergent playbook)",
+    "auth_callback_route": "/dashboard#session_id=fake123 -> AuthCallback renders 'Signing you in…' spinner, POSTs /auth/google/session (401), redirects to /login cleanly (no white-screen, login page re-rendered)"
+  },
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Emergent Google OAuth implementation is correct and matches the playbook: synchronous hash detection in App Shell -> AuthCallback -> POST /auth/google/session with X-Session-ID header; AuthContext skips /auth/me when hash contains session_id (prevents race); set_session_cookie uses SameSite=None + Secure + httpOnly; get_current_user accepts cookie OR Bearer; session_token also returned in response body for SPA Bearer usage.",
+    "STAFF_EMAILS allowlist is correctly enforced for BOTH password login (server.py:299) and Google session (server.py:322), returning 403 with 'team members' message. Owner vsv.visakhapatnam@gmail.com is in the allowlist.",
+    "Google session endpoint correctly reuses existing user (by email) and updates missing photo from Google 'picture'; new users default to role=seeker (not auto-admin), which combined with the pre-staff-gate at line 322 means non-staff Google users are blocked BEFORE any DB write — good.",
+    "Minor: AuthCallback.jsx uses an empty catch block (line 25). Consider logging the error for debugging, though behavior (redirect to /login) is correct."
+  ],
+  "updated_files": ["/app/backend/tests/test_google_auth.py"],
+  "success_rate": {"backend": "100% (8/8)", "frontend": "100% (3/3 smoke flows)"},
+  "test_credentials": "admin: vsv.visakhapatnam@gmail.com / DentalHub@2026 (staff allowlist). Google OAuth consent screen NOT exercised interactively (per instructions). Fake session_ids used to verify 401 branch and AuthCallback redirect behavior.",
+  "seed_data_creation": "TestSessionInjection fixture creates/cleans up one TEST_inject_* user + session_token in Mongo (auto-cleaned via fixture teardown).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "test_google_auth.py validates endpoint-level behavior + Mongo session injection pattern (users.id + user_sessions.session_token with ISO expires_at). The real Google consent flow cannot be automated — only the backend 400/401/403 branches, routing, and session management are testable. Combined with iteration_2 (test_security_fixes.py 13/13) the full auth surface is green."
+}
