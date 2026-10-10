@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
 from datetime import datetime, timezone, timedelta
 import uuid
+import re
 import logging
 import secrets
 import bcrypt
@@ -526,46 +527,55 @@ async def opportunity_applications(opp_id: str, user: dict = Depends(get_current
     return docs
 
 
+PUBLIC_PROJECTION = {
+    "_id": 0, "password_hash": 0, "email": 0, "phone": 0, "address": 0,
+    "pincode": 0, "cv_url": 0, "cv_filename": 0, "contact_person": 0,
+    "designation": 0, "preferred_location": 0, "expected_salary": 0,
+}
+
+
 # ---------------- Directory ----------------
 @api_router.get("/directory/dentists")
 async def dentists(speciality: Optional[str] = None, city: Optional[str] = None, q: Optional[str] = None):
+    import re as _re
     query = {"role": "seeker"}
     if speciality:
         query["speciality"] = speciality
     if city:
         query["city"] = city
     if q:
+        safe = _re.escape(q)
         query["$or"] = [
-            {"name": {"$regex": q, "$options": "i"}},
-            {"speciality": {"$regex": q, "$options": "i"}},
-            {"qualification": {"$regex": q, "$options": "i"}},
+            {"name": {"$regex": safe, "$options": "i"}},
+            {"speciality": {"$regex": safe, "$options": "i"}},
+            {"qualification": {"$regex": safe, "$options": "i"}},
         ]
-    docs = await db.users.find(query, {"_id": 0, "password_hash": 0}).to_list(200)
+    docs = await db.users.find(query, PUBLIC_PROJECTION).to_list(200)
     return docs
 
 
 @api_router.get("/directory/clinics")
 async def clinics(city: Optional[str] = None, q: Optional[str] = None):
+    import re as _re
     query = {"role": "giver"}
     if city:
         query["city"] = city
     if q:
+        safe = _re.escape(q)
         query["$or"] = [
-            {"name": {"$regex": q, "$options": "i"}},
-            {"org_name": {"$regex": q, "$options": "i"}},
-            {"city": {"$regex": q, "$options": "i"}},
+            {"name": {"$regex": safe, "$options": "i"}},
+            {"org_name": {"$regex": safe, "$options": "i"}},
+            {"city": {"$regex": safe, "$options": "i"}},
         ]
-    docs = await db.users.find(query, {"_id": 0, "password_hash": 0}).to_list(200)
+    docs = await db.users.find(query, PUBLIC_PROJECTION).to_list(200)
     return docs
 
 
 @api_router.get("/directory/user/{user_id}")
 async def public_user(user_id: str):
-    doc = await db.users.find_one({"id": user_id}, {"_id": 0, "password_hash": 0})
+    doc = await db.users.find_one({"id": user_id}, PUBLIC_PROJECTION)
     if not doc:
         raise HTTPException(status_code=404, detail="Not found")
-    # hide contact by default
-    doc.pop("phone", None)
     return doc
 
 
@@ -640,7 +650,8 @@ async def upload_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="File too large (max 10MB).")
     file_id = str(uuid.uuid4())
     path = f"{storage.APP_NAME}/uploads/{file_id}.{ext}"
-    content_type = file.content_type or storage.mime_for(file.filename)
+    # Never trust the client-supplied content type — derive it server-side from the extension.
+    content_type = storage.mime_for(f"x.{ext}")
     try:
         result = storage.put_object(path, data, content_type)
     except Exception:
@@ -668,10 +679,14 @@ async def download_file(file_id: str):
     except Exception:
         raise HTTPException(status_code=502, detail="Could not retrieve file")
     fname = record.get("original_filename", "file")
+    safe_name = re.sub(r'[\r\n"]+', "_", str(fname))[:120]
     return Response(
         content=data,
-        media_type=record.get("content_type", content_type),
-        headers={"Content-Disposition": f'inline; filename="{fname}"'},
+        media_type=record.get("content_type", content_type) or "application/octet-stream",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_name}"',
+            "X-Content-Type-Options": "nosniff",
+        },
     )
 
 
@@ -704,12 +719,14 @@ async def create_checkout(req: CheckoutRequest, request: Request):
     if not pkg:
         raise HTTPException(status_code=400, detail="Invalid package")
     host_url = str(request.base_url)
+    # Build redirect URLs from server-trusted config, not client-supplied origin_url (open-redirect guard).
+    base = os.environ.get("FRONTEND_URL", "http://localhost:3000").rstrip("/")
     stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=f"{host_url}api/webhook/stripe")
     cs_req = CheckoutSessionRequest(
         amount=float(pkg["amount"]),
         currency=PAYMENT_CURRENCY,
-        success_url=f"{req.origin_url}/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
-        cancel_url=f"{req.origin_url}/payment/cancel",
+        success_url=f"{base}/payment/success?session_id={{CHECKOUT_SESSION_ID}}",
+        cancel_url=f"{base}/payment/cancel",
         metadata={"package_id": req.package_id, "user_id": req.user_id or ""},
     )
     session = await stripe_checkout.create_checkout_session(cs_req)
@@ -795,7 +812,8 @@ async def _log_confidential_access(request: Request, admin: dict, success: bool)
 
 @api_router.post("/admin/confidential")
 async def admin_confidential(payload: ConfidentialRequest, request: Request, admin: dict = Depends(require_admin)):
-    if payload.password != CONFIDENTIAL_PASSWORD:
+    import hmac
+    if not hmac.compare_digest(str(payload.password), str(CONFIDENTIAL_PASSWORD)):
         await _log_confidential_access(request, admin, False)
         raise HTTPException(status_code=403, detail="Incorrect confidential password")
     await _log_confidential_access(request, admin, True)
