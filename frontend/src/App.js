@@ -28,6 +28,7 @@ import PaymentSuccess from "@/pages/PaymentSuccess";
 import PaymentCancel from "@/pages/PaymentCancel";
 import Join from "@/pages/Join";
 import AdminConfidential from "@/pages/AdminConfidential";
+import Flyer from "@/pages/Flyer";
 import AuthCallback from "@/pages/AuthCallback";
 
 function Shell() {
@@ -57,6 +58,7 @@ function Shell() {
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/cancel" element={<PaymentCancel />} />
           <Route path="/join" element={<Join />} />
+          <Route path="/flyer" element={<Flyer />} />
           <Route path="/admin/confidential" element={<ProtectedRoute adminOnly><AdminConfidential /></ProtectedRoute>} />
           <Route path="/post" element={<ProtectedRoute><PostOpportunity /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

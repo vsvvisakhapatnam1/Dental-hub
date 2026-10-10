@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from "sonner";
 import {
   Loader2, Users, Briefcase, Building2, FileText, Clock, ShieldCheck, CheckCircle2, XCircle,
-  BadgeCheck, MoreVertical, Sparkles, QrCode, Copy, Download, Lock, Link2,
+  BadgeCheck, MoreVertical, Sparkles, QrCode, Copy, Download, Lock, Link2, FileDown,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -166,9 +166,10 @@ export default function AdminDashboard() {
                 <Link2 className="h-4 w-4 text-slate-400 shrink-0" />
                 <span data-testid="join-link" className="truncate">{joinUrl}</span>
               </div>
-              <div className="mt-3 flex gap-2 justify-center">
+              <div className="mt-3 flex gap-2 justify-center flex-wrap">
                 <Button data-testid="copy-join-link" variant="outline" onClick={copyLink} className="rounded-full"><Copy className="h-4 w-4 mr-1" /> Copy link</Button>
                 <a href={qrSrc} download="dentalhubpro-join-qr.png"><Button className="rounded-full bg-emerald-800 hover:bg-emerald-900"><Download className="h-4 w-4 mr-1" /> Download QR</Button></a>
+                <Link to="/flyer" target="_blank"><Button data-testid="open-flyer" variant="outline" className="rounded-full"><FileDown className="h-4 w-4 mr-1" /> Printable Flyer</Button></Link>
               </div>
             </div>
 

@@ -78,3 +78,10 @@ body {
 @layer base {
     [data-debug-wrapper="true"] { display: contents !important; }
 }
+
+@media print {
+    header, footer { display: none !important; }
+    .no-print { display: none !important; }
+    .print-flyer { box-shadow: none !important; }
+    body { background: #fff !important; }
+}

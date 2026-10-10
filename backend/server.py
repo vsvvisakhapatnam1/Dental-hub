@@ -782,10 +782,23 @@ class ConfidentialRequest(BaseModel):
     password: str
 
 
+async def _log_confidential_access(request: Request, admin: dict, success: bool):
+    ip = (request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+          or (request.client.host if request.client else None))
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()), "type": "confidential_access",
+        "admin_id": admin.get("id"), "admin_email": admin.get("email"),
+        "success": success, "ip": ip, "user_agent": request.headers.get("user-agent"),
+        "created_at": now_utc().isoformat(),
+    })
+
+
 @api_router.post("/admin/confidential")
-async def admin_confidential(payload: ConfidentialRequest, admin: dict = Depends(require_admin)):
+async def admin_confidential(payload: ConfidentialRequest, request: Request, admin: dict = Depends(require_admin)):
     if payload.password != CONFIDENTIAL_PASSWORD:
+        await _log_confidential_access(request, admin, False)
         raise HTTPException(status_code=403, detail="Incorrect confidential password")
+    await _log_confidential_access(request, admin, True)
 
     def pick(u):
         return {
@@ -805,6 +818,11 @@ async def admin_confidential(payload: ConfidentialRequest, admin: dict = Depends
     seekers = [pick(u) async for u in db.users.find({"role": "seeker"}, {"_id": 0}).sort("created_at", -1)]
     givers = [pick(u) async for u in db.users.find({"role": "giver"}, {"_id": 0}).sort("created_at", -1)]
     return {"seekers": seekers, "givers": givers, "seeker_count": len(seekers), "giver_count": len(givers)}
+
+
+@api_router.get("/admin/confidential/logs")
+async def confidential_logs(admin: dict = Depends(require_admin)):
+    return [l async for l in db.audit_logs.find({"type": "confidential_access"}, {"_id": 0}).sort("created_at", -1).limit(50)]
 
 
 app.include_router(api_router)
