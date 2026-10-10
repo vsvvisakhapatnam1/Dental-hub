@@ -173,6 +173,8 @@ class TestRegression:
             "state": "Telangana", "qualification": "BDS",
             "speciality": "General Dentistry", "experience": "0-2 years",
             "looking_for": ["Dental Job"], "cv_url": cv_url, "cv_filename": "cv.pdf",
+            "phone": "9999999999", "preferred_location": "Hyderabad",
+            "address": "Test Address 123", "pincode": "500001",
         }
         r = requests.post(f"{API}/auth/register", json=payload)
         assert r.status_code == 200, r.text
