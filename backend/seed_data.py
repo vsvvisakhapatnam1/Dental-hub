@@ -158,7 +158,7 @@ async def seed_all(db, hash_password, default_verification, now_utc):
         })
     else:
         from bcrypt import checkpw
-        if not admin.get("password_hash") or not checkpw(ADMIN_PASSWORD.encode(), admin["password_hash"].encode()):
+        if not admin.get("password_hash") or (not admin.get("password_changed") and not checkpw(ADMIN_PASSWORD.encode(), admin["password_hash"].encode())):
             await db.users.update_one({"email": ADMIN_EMAIL}, {"$set": {"password_hash": hash_password(ADMIN_PASSWORD), "role": "admin"}})
 
     # Staff team accounts (idempotent) — all admins, allowlisted for login

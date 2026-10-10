@@ -30,6 +30,8 @@ import Join from "@/pages/Join";
 import AdminConfidential from "@/pages/AdminConfidential";
 import Flyer from "@/pages/Flyer";
 import AuthCallback from "@/pages/AuthCallback";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 
 function Shell() {
   const location = useLocation();
@@ -44,6 +46,8 @@ function Shell() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/opportunities" element={<FindOpportunities />} />
           <Route path="/opportunities/:id" element={<OpportunityDetail />} />
           <Route path="/dentists" element={<DentistDirectory />} />

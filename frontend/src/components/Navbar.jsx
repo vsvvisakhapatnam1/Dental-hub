@@ -21,7 +21,6 @@ const FIND_OPPS = [
   { label: "Abroad Opportunities", to: "/opportunities?category=Abroad Opportunity" },
 ];
 const DENTAL_SERVICES = [
-  { label: "Pricing & Plans", to: "/pricing" },
   { label: "Dental Labs", to: "/opportunities?category=Dental Lab" },
   { label: "Dental Equipment", to: "/products" },
   { label: "Digital Dentistry", to: "/products" },

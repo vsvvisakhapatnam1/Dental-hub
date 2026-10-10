@@ -19,6 +19,8 @@ import bcrypt
 import httpx
 import sheets_sync
 import storage
+import email_service
+from html import escape as html_escape
 
 STAFF_EMAILS = [e.strip().lower() for e in os.environ.get(
     "STAFF_EMAILS", "tdvsatishkumar@gmail.com,vsv.visakhapatnam@gmail.com,info@dentalhubpro.com"
@@ -353,6 +355,77 @@ async def google_session(request: Request, response: Response):
     out = clean_user(user)
     out["session_token"] = token
     return out
+
+
+class ForgotPasswordInput(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordInput(BaseModel):
+    token: str
+    password: str
+
+
+RESET_TOKEN_MINUTES = 60
+FORGOT_GENERIC_MSG = "If this email belongs to an authorized team member, a reset link has been sent."
+
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(payload: ForgotPasswordInput):
+    email = payload.email.lower().strip()
+    if STAFF_EMAILS and email not in STAFF_EMAILS:
+        return {"message": FORGOT_GENERIC_MSG}
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    if not user:
+        return {"message": FORGOT_GENERIC_MSG}
+    recent = await db.password_reset_tokens.find_one({
+        "user_id": user["id"], "used": False,
+        "created_at": {"$gt": (now_utc() - timedelta(seconds=60)).isoformat()},
+    })
+    if recent:
+        return {"message": FORGOT_GENERIC_MSG}
+    token = secrets.token_urlsafe(32)
+    await db.password_reset_tokens.insert_one({
+        "token": token, "user_id": user["id"], "used": False,
+        "created_at": now_utc().isoformat(),
+        "expires_at": now_utc() + timedelta(minutes=RESET_TOKEN_MINUTES),
+    })
+    base = os.environ["FRONTEND_URL"].rstrip("/")
+    link = f"{base}/reset-password?token={token}"
+    name = html_escape(user.get("name") or "there")
+    brand = html_escape(email_service.EMAIL_FROM_NAME)
+    html = (
+        '<table role="presentation" width="100%"><tr><td style="padding:24px;font-family:Arial,sans-serif;color:#0f172a">'
+        f'<h2 style="color:#065f46;margin:0 0 12px">{brand}</h2>'
+        f'<p>Hi {name},</p>'
+        '<p>We received a request to reset your account password. Click the button below to choose a new one. '
+        f'This link expires in {RESET_TOKEN_MINUTES} minutes and can be used once.</p>'
+        f'<p><a href="{html_escape(link)}" style="display:inline-block;background:#065f46;color:#ffffff;padding:12px 20px;'
+        'border-radius:8px;text-decoration:none;font-weight:bold">Reset password</a></p>'
+        "<p>If you didn't request this, you can safely ignore this email.</p>"
+        f'<p style="font-size:12px;color:#888">Sent by {brand}. We never ask for your password by email.</p>'
+        '</td></tr></table>'
+    )
+    await email_service.send_email(to=email, subject=f"Reset your {email_service.EMAIL_FROM_NAME} password", html=html)
+    return {"message": FORGOT_GENERIC_MSG}
+
+
+@api_router.post("/auth/reset-password")
+async def reset_password(payload: ResetPasswordInput):
+    if len(payload.password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    rec = await db.password_reset_tokens.find_one({"token": payload.token})
+    if not rec or rec.get("used"):
+        raise HTTPException(status_code=400, detail="This reset link is invalid or has already been used")
+    exp = rec["expires_at"]
+    if exp.tzinfo is None:
+        exp = exp.replace(tzinfo=timezone.utc)
+    if exp < now_utc():
+        raise HTTPException(status_code=400, detail="This reset link has expired. Please request a new one.")
+    await db.users.update_one({"id": rec["user_id"]}, {"$set": {"password_hash": hash_password(payload.password), "password_changed": True}})
+    await db.password_reset_tokens.update_one({"token": payload.token}, {"$set": {"used": True}})
+    await db.user_sessions.delete_many({"user_id": rec["user_id"]})
+    return {"message": "Password updated. You can now log in with your new password."}
 
 
 @api_router.get("/auth/me")
@@ -869,6 +942,8 @@ async def startup():
     await db.users.create_index("id", unique=True)
     await db.user_sessions.create_index("session_token", unique=True)
     await db.opportunities.create_index("id", unique=True)
+    await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
+    await db.password_reset_tokens.create_index("token", unique=True)
     await seed_all(db, hash_password, default_verification, now_utc)
 
 
