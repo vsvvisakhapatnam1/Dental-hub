@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import api from "@/lib/api";
 import { VerificationBadge, topVerification } from "@/components/VerificationBadge";
 import { VERIFICATION_LEVELS } from "@/lib/constants";
@@ -9,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from "sonner";
 import {
   Loader2, Users, Briefcase, Building2, FileText, Clock, ShieldCheck, CheckCircle2, XCircle,
-  BadgeCheck, MoreVertical, Sparkles,
+  BadgeCheck, MoreVertical, Sparkles, QrCode, Copy, Download, Lock, Link2,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -41,6 +42,10 @@ export default function AdminDashboard() {
 
   if (loading) return <div className="min-h-[60vh] grid place-items-center"><Loader2 className="h-8 w-8 animate-spin text-emerald-700" /></div>;
 
+  const joinUrl = `${window.location.origin}/join`;
+  const qrSrc = `${process.env.REACT_APP_BACKEND_URL}/api/qr/join`;
+  const copyLink = () => { navigator.clipboard.writeText(joinUrl).then(() => toast.success("Join link copied")); };
+
   const STAT_CARDS = [
     { label: "Total Users", value: stats?.users, icon: Users },
     { label: "Dentists", value: stats?.dentists, icon: Users },
@@ -70,6 +75,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="moderation" data-testid="admin-tab-moderation" className="rounded-full">Opportunities</TabsTrigger>
           <TabsTrigger value="users" data-testid="admin-tab-users" className="rounded-full">Users & Verification</TabsTrigger>
           <TabsTrigger value="applications" data-testid="admin-tab-applications" className="rounded-full">Applications</TabsTrigger>
+          <TabsTrigger value="share" data-testid="admin-tab-share" className="rounded-full">Share & QR</TabsTrigger>
         </TabsList>
 
         <TabsContent value="moderation" className="mt-6">
@@ -145,6 +151,37 @@ export default function AdminDashboard() {
                   ))}
               </TableBody>
             </Table>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="share" className="mt-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 text-center">
+              <h3 className="font-heading text-lg font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2"><QrCode className="h-5 w-5 text-emerald-800" /> Join QR Code</h3>
+              <p className="mt-1 text-sm text-slate-500">Scan to open the Seeker / Giver join page.</p>
+              <div className="mt-4 inline-block rounded-2xl border border-slate-200 dark:border-slate-700 p-3 bg-white">
+                <img src={qrSrc} alt="Join QR code" data-testid="join-qr" className="h-52 w-52" />
+              </div>
+              <div className="mt-4 flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm">
+                <Link2 className="h-4 w-4 text-slate-400 shrink-0" />
+                <span data-testid="join-link" className="truncate">{joinUrl}</span>
+              </div>
+              <div className="mt-3 flex gap-2 justify-center">
+                <Button data-testid="copy-join-link" variant="outline" onClick={copyLink} className="rounded-full"><Copy className="h-4 w-4 mr-1" /> Copy link</Button>
+                <a href={qrSrc} download="dentalhubpro-join-qr.png"><Button className="rounded-full bg-emerald-800 hover:bg-emerald-900"><Download className="h-4 w-4 mr-1" /> Download QR</Button></a>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+              <h3 className="font-heading text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2"><Lock className="h-5 w-5 text-red-600" /> Confidential Records</h3>
+              <p className="mt-2 text-sm text-slate-500">Seeker &amp; Giver personal contact details (phone, email, address, resume) are kept private and are only accessible on a separate, password-protected page.</p>
+              <ul className="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-600" /> Admin login required</li>
+                <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-600" /> Extra confidential password</li>
+                <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-600" /> Resume / CV view access</li>
+              </ul>
+              <Link to="/admin/confidential"><Button data-testid="open-confidential" className="mt-5 rounded-full bg-red-600 hover:bg-red-700"><Lock className="h-4 w-4 mr-1" /> Open Confidential Page</Button></Link>
+            </div>
           </div>
         </TabsContent>
       </Tabs>

@@ -764,6 +764,49 @@ async def stripe_webhook(request: Request):
     return {"status": "ok"}
 
 
+CONFIDENTIAL_PASSWORD = os.environ.get("CONFIDENTIAL_PASSWORD", "Confidential@2026")
+
+
+@api_router.get("/qr/join")
+async def qr_join():
+    import qrcode, io
+    base = os.environ.get("FRONTEND_URL", "http://localhost:3000").rstrip("/")
+    img = qrcode.make(f"{base}/join")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return Response(content=buf.getvalue(), media_type="image/png",
+                    headers={"Content-Disposition": 'inline; filename="dentalhubpro-join-qr.png"'})
+
+
+class ConfidentialRequest(BaseModel):
+    password: str
+
+
+@api_router.post("/admin/confidential")
+async def admin_confidential(payload: ConfidentialRequest, admin: dict = Depends(require_admin)):
+    if payload.password != CONFIDENTIAL_PASSWORD:
+        raise HTTPException(status_code=403, detail="Incorrect confidential password")
+
+    def pick(u):
+        return {
+            "id": u.get("id"), "name": u.get("name"), "email": u.get("email"),
+            "phone": u.get("phone"), "city": u.get("city"), "state": u.get("state"),
+            "country": u.get("country"), "address": u.get("address"), "pincode": u.get("pincode"),
+            "profile_type": u.get("profile_type"), "qualification": u.get("qualification"),
+            "speciality": u.get("speciality"), "experience": u.get("experience"),
+            "preferred_location": u.get("preferred_location"), "preferred_type": u.get("preferred_type"),
+            "looking_for": u.get("looking_for", []), "offering": u.get("offering", []),
+            "org_name": u.get("org_name"), "contact_person": u.get("contact_person"),
+            "designation": u.get("designation"), "website": u.get("website"),
+            "cv_url": u.get("cv_url"), "cv_filename": u.get("cv_filename"),
+            "created_at": u.get("created_at"),
+        }
+
+    seekers = [pick(u) async for u in db.users.find({"role": "seeker"}, {"_id": 0}).sort("created_at", -1)]
+    givers = [pick(u) async for u in db.users.find({"role": "giver"}, {"_id": 0}).sort("created_at", -1)]
+    return {"seekers": seekers, "givers": givers, "seeker_count": len(seekers), "giver_count": len(givers)}
+
+
 app.include_router(api_router)
 
 app.add_middleware(
