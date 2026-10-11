@@ -21,6 +21,7 @@ import httpx
 import sheets_sync
 import storage
 import email_service
+import whatsapp
 from html import escape as html_escape
 
 STAFF_EMAILS = [e.strip().lower() for e in os.environ.get(
@@ -289,6 +290,7 @@ async def register(payload: RegisterInput, response: Response):
     }
     await db.users.insert_one(doc)
     asyncio.create_task(sync_user_to_sheet({**doc}))
+    asyncio.create_task(send_registration_welcome({**doc}))
     token = await create_session(user_id)
     set_session_cookie(response, token)
     out = clean_user({**doc})
@@ -762,6 +764,48 @@ async def download_file(file_id: str):
             "X-Content-Type-Options": "nosniff",
         },
     )
+
+
+# ---------------- Registration welcome (email + WhatsApp) ----------------
+THANK_YOU_LINE = "Thank you for Registering In Dental Hub Pro and Our Team will reach you shortly."
+
+
+async def send_registration_welcome(user: dict):
+    status = {}
+    brand = html_escape(email_service.EMAIL_FROM_NAME)
+    site = os.environ["FRONTEND_URL"].rstrip("/")
+    rows = [("Name", user.get("org_name") or user.get("name")),
+            ("Registered as", "Giver" if user.get("role") == "giver" else "Seeker"),
+            ("City", user.get("city"))]
+    summary = "".join(
+        f'<tr><td style="padding:4px 12px 4px 0;color:#64748b">{k}</td><td style="padding:4px 0"><strong>{html_escape(str(v or "-"))}</strong></td></tr>'
+        for k, v in rows)
+    html = (
+        '<table role="presentation" width="100%"><tr><td style="padding:24px;font-family:Arial,sans-serif;color:#0f172a">'
+        f'<h2 style="color:#065f46;margin:0 0 12px">{brand}</h2>'
+        f'<p>Hi {html_escape(user.get("name") or "there")},</p>'
+        f'<p style="font-size:16px">{THANK_YOU_LINE}</p>'
+        f'<table role="presentation" style="margin:12px 0;font-size:14px">{summary}</table>'
+        f'<p><a href="{html_escape(site)}" style="color:#065f46;font-weight:bold">Visit Dental Hub Pro</a></p>'
+        f'<p style="font-size:12px;color:#888">Sent by {brand}. We never ask for your password by email.</p>'
+        '</td></tr></table>'
+    )
+    try:
+        await email_service.send_email(to=user["email"], subject="Thank you for registering with Dental Hub Pro", html=html)
+        status["welcome_email_status"] = "sent"
+    except Exception as e:
+        logger.warning(f"[welcome] email failed for {user.get('email')}: {e}")
+        status["welcome_email_status"] = "failed"
+    if whatsapp.is_configured():
+        try:
+            status["whatsapp_message_id"] = await whatsapp.send_registration_thanks(user.get("phone"), user.get("name"))
+            status["whatsapp_status"] = "sent"
+        except Exception as e:
+            logger.warning(f"[welcome] whatsapp failed for {user.get('email')}: {e}")
+            status["whatsapp_status"] = "failed"
+    else:
+        status["whatsapp_status"] = "not_configured"
+    await db.users.update_one({"id": user["id"]}, {"$set": status})
 
 
 # ---------------- Google Sheet / Drive sync ----------------
