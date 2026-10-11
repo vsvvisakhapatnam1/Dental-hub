@@ -16,6 +16,8 @@ React + FastAPI (`/app/backend/server.py`) + MongoDB. Opaque session tokens (coo
 
 - 2026-10-11: Registration welcome. After every Seeker/Giver signup, an email is sent through Resend with the thank-you line plus a short summary (name, role, city). A WhatsApp template message is also sent through the Meta Cloud API (`whatsapp.py`; template `registration_thank_you`, language `en`, 1 body variable = name). WhatsApp does nothing until META_ACCESS_TOKEN and META_PHONE_NUMBER_ID are set. Results are saved on the user as welcome_email_status and whatsapp_status.
 
+- 2026-10-11: Team signup alert. Each Seeker/Giver registration sends an email to TEAM_ALERT_EMAIL (vsv.visakhapatnam@gmail.com) with name, org, role, phone, email, city and an admin dashboard link. Result is saved on the user as team_alert_status.
+
 ## Decisions
 - Login (email + Google) stays STAFF ONLY; no brute-force lockout (user choice)
 

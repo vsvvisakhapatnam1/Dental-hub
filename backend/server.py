@@ -291,6 +291,7 @@ async def register(payload: RegisterInput, response: Response):
     await db.users.insert_one(doc)
     asyncio.create_task(sync_user_to_sheet({**doc}))
     asyncio.create_task(send_registration_welcome({**doc}))
+    asyncio.create_task(send_team_signup_alert({**doc}))
     token = await create_session(user_id)
     set_session_cookie(response, token)
     out = clean_user({**doc})
@@ -806,6 +807,32 @@ async def send_registration_welcome(user: dict):
     else:
         status["whatsapp_status"] = "not_configured"
     await db.users.update_one({"id": user["id"]}, {"$set": status})
+
+
+async def send_team_signup_alert(user: dict):
+    role = "Giver" if user.get("role") == "giver" else "Seeker"
+    brand = html_escape(email_service.EMAIL_FROM_NAME)
+    admin_url = os.environ["FRONTEND_URL"].rstrip("/") + "/admin"
+    rows = [("Name", user.get("name")), ("Organisation", user.get("org_name")), ("Registered as", role),
+            ("Phone", user.get("phone")), ("Email", user.get("email")), ("City", user.get("city"))]
+    table = "".join(
+        f'<tr><td style="padding:4px 12px 4px 0;color:#64748b">{k}</td><td style="padding:4px 0"><strong>{html_escape(str(v))}</strong></td></tr>'
+        for k, v in rows if v)
+    html = (
+        '<table role="presentation" width="100%"><tr><td style="padding:24px;font-family:Arial,sans-serif;color:#0f172a">'
+        f'<h2 style="color:#065f46;margin:0 0 12px">New {role} registration</h2>'
+        f'<table role="presentation" style="font-size:14px">{table}</table>'
+        f'<p><a href="{html_escape(admin_url)}" style="color:#065f46;font-weight:bold">Open Admin Dashboard</a></p>'
+        f'<p style="font-size:12px;color:#888">Internal alert from {brand}.</p>'
+        '</td></tr></table>'
+    )
+    try:
+        await email_service.send_email(to=os.environ["TEAM_ALERT_EMAIL"],
+                                       subject=f"New {role}: {user.get('org_name') or user.get('name')} ({user.get('city') or '-'})", html=html)
+        await db.users.update_one({"id": user["id"]}, {"$set": {"team_alert_status": "sent"}})
+    except Exception as e:
+        logger.warning(f"[team-alert] failed for {user.get('email')}: {e}")
+        await db.users.update_one({"id": user["id"]}, {"$set": {"team_alert_status": "failed"}})
 
 
 # ---------------- Google Sheet / Drive sync ----------------
