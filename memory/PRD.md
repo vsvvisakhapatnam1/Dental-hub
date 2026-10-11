@@ -18,12 +18,14 @@ React + FastAPI (`/app/backend/server.py`) + MongoDB. Opaque session tokens (coo
 
 - 2026-10-11: Team signup alert. Each Seeker/Giver registration sends an email to TEAM_ALERT_EMAIL (vsv.visakhapatnam@gmail.com) with name, org, role, phone, email, city and an admin dashboard link. Result is saved on the user as team_alert_status.
 
+- 2026-10-11: Daily signup digest. A platform cron (`.emergent/crons.yml`, 09:00 Asia/Kolkata) calls POST /api/cron/signup-digest (Bearer WEBHOOK_CRON_SECRET). It emails TEAM_ALERT_EMAIL a list of the previous IST day's Seekers and Givers (name, phone, city, email). Sends at most once per day (digest_runs.day unique).
+
 ## Decisions
 - Login (email + Google) stays STAFF ONLY; no brute-force lockout (user choice)
 
 ## Backlog
 - P0: User to deploy Apps Script and share the web-app URL, then set GOOGLE_APPS_SCRIPT_URL in preview .env and production secrets
-- P0: User to set up Meta WhatsApp Cloud API (number +91-89519 50389), get the template approved, and send META_ACCESS_TOKEN + META_PHONE_NUMBER_ID
+- P0: User to set up Meta WhatsApp Cloud API (number +91-89519 50389), get the template approved, and send META_ACCESS_TOKEN + META_PHONE_NUMBER_ID. Blocked: new WhatsApp Business account cannot generate a token yet (needs Meta Business verification / System User)
 - P1: Stripe live key (India) when payments are re-enabled
 - P1: "I'm Both" user type; Phase 2/3 marketplace expansion
 - P2: CSV export from admin confidential; real Team page content

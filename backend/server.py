@@ -835,6 +835,72 @@ async def send_team_signup_alert(user: dict):
         await db.users.update_one({"id": user["id"]}, {"$set": {"team_alert_status": "failed"}})
 
 
+# ---------------- Daily signup digest (cron) ----------------
+IST = timezone(timedelta(hours=5, minutes=30))
+
+
+async def send_signup_digest(day_key: str, start_utc: datetime, end_utc: datetime):
+    try:
+        await db.digest_runs.insert_one({"day": day_key, "created_at": now_utc().isoformat()})
+    except Exception:
+        logger.info(f"[digest] already sent for {day_key}")
+        return
+    q = {"role": {"$in": ["seeker", "giver"]}, "is_demo": {"$ne": True},
+         "created_at": {"$gte": start_utc.isoformat(), "$lt": end_utc.isoformat()}}
+    users = await db.users.find(q, {"_id": 0, "name": 1, "org_name": 1, "role": 1, "phone": 1, "city": 1, "email": 1}).sort("created_at", 1).to_list(1000)
+    seekers = [u for u in users if u["role"] == "seeker"]
+    givers = [u for u in users if u["role"] == "giver"]
+    td = 'style="padding:6px 10px;border-bottom:1px solid #e2e8f0"'
+
+    def section(title, items):
+        if not items:
+            return f'<h3 style="color:#065f46;margin:20px 0 6px">{title} (0)</h3><p style="color:#64748b">No new registrations.</p>'
+        rows = "".join(
+            f'<tr><td {td}>{html_escape(u.get("org_name") or u.get("name") or "-")}</td><td {td}>{html_escape(u.get("phone") or "-")}</td>'
+            f'<td {td}>{html_escape(u.get("city") or "-")}</td><td {td}>{html_escape(u.get("email") or "-")}</td></tr>' for u in items)
+        head = "".join(f'<th align="left" {td}>{h}</th>' for h in ("Name", "Phone", "City", "Email"))
+        return (f'<h3 style="color:#065f46;margin:20px 0 6px">{title} ({len(items)})</h3>'
+                f'<table role="presentation" cellspacing="0" style="font-size:14px;border-collapse:collapse"><tr>{head}</tr>{rows}</table>')
+
+    brand = html_escape(email_service.EMAIL_FROM_NAME)
+    admin_url = os.environ["FRONTEND_URL"].rstrip("/") + "/admin"
+    html = (
+        '<table role="presentation" width="100%"><tr><td style="padding:24px;font-family:Arial,sans-serif;color:#0f172a">'
+        f'<h2 style="color:#065f46;margin:0 0 4px">Daily signup digest</h2>'
+        f'<p style="color:#64748b;margin:0">Registrations on {html_escape(day_key)} (IST): {len(users)} total</p>'
+        f'{section("Seekers", seekers)}{section("Givers", givers)}'
+        f'<p style="margin-top:20px"><a href="{html_escape(admin_url)}" style="color:#065f46;font-weight:bold">Open Admin Dashboard</a></p>'
+        f'<p style="font-size:12px;color:#888">Internal digest from {brand}.</p>'
+        '</td></tr></table>'
+    )
+    try:
+        await email_service.send_email(to=os.environ["TEAM_ALERT_EMAIL"],
+                                       subject=f"Dental Hub Pro daily digest {day_key}: {len(seekers)} Seekers, {len(givers)} Givers", html=html)
+        logger.info(f"[digest] sent for {day_key} ({len(users)} users)")
+    except Exception as e:
+        logger.warning(f"[digest] send failed for {day_key}: {e}")
+        await db.digest_runs.delete_one({"day": day_key})
+
+
+@api_router.post("/cron/signup-digest")
+async def cron_signup_digest(request: Request):
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    import hmac
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer ") or not hmac.compare_digest(auth[7:], os.environ["WEBHOOK_CRON_SECRET"]):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    try:
+        await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid body")
+    today_ist = datetime.now(IST).replace(hour=0, minute=0, second=0, microsecond=0)
+    start = (today_ist - timedelta(days=1)).astimezone(timezone.utc)
+    end = today_ist.astimezone(timezone.utc)
+    day_key = (today_ist - timedelta(days=1)).strftime("%Y-%m-%d")
+    asyncio.create_task(send_signup_digest(day_key, start, end))
+    return {"accepted": True, "day": day_key}
+
+
 # ---------------- Google Sheet / Drive sync ----------------
 async def _cv_for(user: dict):
     m = re.match(r"^/api/files/([\w-]+)$", user.get("cv_url") or "")
@@ -1074,6 +1140,7 @@ async def startup():
     await db.opportunities.create_index("id", unique=True)
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
     await db.password_reset_tokens.create_index("token", unique=True)
+    await db.digest_runs.create_index("day", unique=True)
     await seed_all(db, hash_password, default_verification, now_utc)
     asyncio.create_task(backfill_sheet())
 
