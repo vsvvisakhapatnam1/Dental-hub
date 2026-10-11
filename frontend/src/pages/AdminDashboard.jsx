@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { FollowUpTracker } from "@/components/FollowUpTracker";
 import {
   Loader2, Users, Briefcase, Building2, FileText, Clock, ShieldCheck, CheckCircle2, XCircle,
   BadgeCheck, MoreVertical, Sparkles, QrCode, Copy, Download, Lock, Link2, FileDown, FileSpreadsheet,
@@ -97,8 +98,9 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="moderation" className="mt-10">
-        <TabsList className="rounded-full bg-slate-100 dark:bg-slate-800">
+        <TabsList className="rounded-full bg-slate-100 dark:bg-slate-800 flex-wrap h-auto">
           <TabsTrigger value="moderation" data-testid="admin-tab-moderation" className="rounded-full">Opportunities</TabsTrigger>
+          <TabsTrigger value="followups" data-testid="admin-tab-followups" className="rounded-full">Follow-Ups</TabsTrigger>
           <TabsTrigger value="users" data-testid="admin-tab-users" className="rounded-full">Users & Verification</TabsTrigger>
           <TabsTrigger value="applications" data-testid="admin-tab-applications" className="rounded-full">Applications</TabsTrigger>
           <TabsTrigger value="share" data-testid="admin-tab-share" className="rounded-full">Share & QR</TabsTrigger>
@@ -130,6 +132,10 @@ export default function AdminDashboard() {
               </TableBody>
             </Table>
           </div>
+        </TabsContent>
+
+        <TabsContent value="followups" className="mt-6">
+          <FollowUpTracker users={users} onSaved={(id, fu) => setUsers((prev) => prev.map((x) => (x.id === id ? { ...x, follow_up: fu } : x)))} />
         </TabsContent>
 
         <TabsContent value="users" className="mt-6">

@@ -20,6 +20,8 @@ React + FastAPI (`/app/backend/server.py`) + MongoDB. Opaque session tokens (coo
 
 - 2026-10-11: Daily signup digest. A platform cron (`.emergent/crons.yml`, 09:00 Asia/Kolkata) calls POST /api/cron/signup-digest (Bearer WEBHOOK_CRON_SECRET). It emails TEAM_ALERT_EMAIL a list of the previous IST day's Seekers and Givers (name, phone, city, email). Sends at most once per day (digest_runs.day unique).
 
+- 2026-10-11: Follow-up tracker. New Admin Dashboard tab "Follow-Ups" lists Seeker/Giver registrations with filters (Not contacted / Contacted / All), tap-to-call phone, a note, and a Contacted toggle. The admin who marked it and the time are recorded. Endpoint: PUT /api/admin/users/{id}/followup {contacted, note} saves to users.follow_up.
+
 ## Decisions
 - Login (email + Google) stays STAFF ONLY; no brute-force lockout (user choice)
 

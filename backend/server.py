@@ -706,6 +706,21 @@ async def verify_user(user_id: str, level: str = Query(...), value: bool = Query
     return {"success": True}
 
 
+class FollowUpInput(BaseModel):
+    contacted: bool
+    note: Optional[str] = None
+
+
+@api_router.put("/admin/users/{user_id}/followup")
+async def set_followup(user_id: str, payload: FollowUpInput, admin: dict = Depends(require_admin)):
+    follow_up = {"contacted": payload.contacted, "note": (payload.note or "").strip()[:500],
+                 "by": admin.get("email"), "at": now_utc().isoformat()}
+    res = await db.users.update_one({"id": user_id, "role": {"$in": ["seeker", "giver"]}}, {"$set": {"follow_up": follow_up}})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Registration not found")
+    return follow_up
+
+
 @api_router.get("/admin/applications")
 async def admin_applications(admin: dict = Depends(require_admin)):
     return await db.applications.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
