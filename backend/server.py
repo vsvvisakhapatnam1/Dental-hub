@@ -13,6 +13,7 @@ from typing import List, Optional
 from datetime import datetime, timezone, timedelta
 import uuid
 import re
+import asyncio
 import logging
 import secrets
 import bcrypt
@@ -287,7 +288,7 @@ async def register(payload: RegisterInput, response: Response):
         "created_at": now_utc().isoformat(),
     }
     await db.users.insert_one(doc)
-    await sheets_sync.sync_registration(doc)
+    asyncio.create_task(sync_user_to_sheet({**doc}))
     token = await create_session(user_id)
     set_session_cookie(response, token)
     out = clean_user({**doc})
@@ -763,6 +764,64 @@ async def download_file(file_id: str):
     )
 
 
+# ---------------- Google Sheet / Drive sync ----------------
+async def _cv_for(user: dict):
+    m = re.match(r"^/api/files/([\w-]+)$", user.get("cv_url") or "")
+    if not m:
+        return None
+    rec = await db.files.find_one({"id": m.group(1), "is_deleted": False})
+    if not rec:
+        return None
+    try:
+        data, ct = await asyncio.to_thread(storage.get_object, rec["storage_path"])
+    except Exception as e:
+        logger.warning(f"[sheets] could not fetch CV for {user.get('email')}: {e}")
+        return None
+    return data, rec.get("content_type") or ct, rec.get("original_filename") or "cv"
+
+
+async def sync_user_to_sheet(user: dict) -> bool:
+    if not sheets_sync.is_configured():
+        return False
+    cv = await _cv_for(user) if user.get("role") == "seeker" else None
+    ok = await sheets_sync.sync_registration(user, cv)
+    if ok:
+        await db.users.update_one({"id": user["id"]}, {"$set": {"sheet_synced": True}})
+    return ok
+
+
+SHEET_PENDING_QUERY = {"role": {"$in": ["seeker", "giver"]}, "is_demo": {"$ne": True}, "sheet_synced": {"$ne": True}}
+_backfill_running = False
+
+
+async def backfill_sheet():
+    global _backfill_running
+    if _backfill_running or not sheets_sync.is_configured():
+        return
+    _backfill_running = True
+    try:
+        async for u in db.users.find(SHEET_PENDING_QUERY, {"_id": 0, "password_hash": 0}).sort("created_at", 1):
+            await sync_user_to_sheet(u)
+    finally:
+        _backfill_running = False
+
+
+@api_router.get("/admin/sheets/status")
+async def sheets_status(admin: dict = Depends(require_admin)):
+    info = await sheets_sync.ping()
+    info["pending"] = await db.users.count_documents(SHEET_PENDING_QUERY)
+    info["running"] = _backfill_running
+    return info
+
+
+@api_router.post("/admin/sheets/sync")
+async def sheets_sync_now(admin: dict = Depends(require_admin)):
+    if not sheets_sync.is_configured():
+        raise HTTPException(status_code=400, detail="Google Sheet is not connected yet")
+    asyncio.create_task(backfill_sheet())
+    return {"started": True, "pending": await db.users.count_documents(SHEET_PENDING_QUERY)}
+
+
 # ---------------- Payments (Stripe) ----------------
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest
 
@@ -945,6 +1004,7 @@ async def startup():
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
     await db.password_reset_tokens.create_index("token", unique=True)
     await seed_all(db, hash_password, default_verification, now_utc)
+    asyncio.create_task(backfill_sheet())
 
 
 @app.on_event("shutdown")

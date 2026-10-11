@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from "sonner";
 import {
   Loader2, Users, Briefcase, Building2, FileText, Clock, ShieldCheck, CheckCircle2, XCircle,
-  BadgeCheck, MoreVertical, Sparkles, QrCode, Copy, Download, Lock, Link2, FileDown,
+  BadgeCheck, MoreVertical, Sparkles, QrCode, Copy, Download, Lock, Link2, FileDown, FileSpreadsheet,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -19,6 +19,17 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sheet, setSheet] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+
+  useEffect(() => { api.get("/admin/sheets/status").then((r) => setSheet(r.data)).catch(() => {}); }, []);
+
+  const syncSheet = async () => {
+    setSyncing(true);
+    try { const { data } = await api.post("/admin/sheets/sync"); toast.success(`Syncing ${data.pending} record(s) to Google Sheet`); }
+    catch (e) { toast.error(e.response?.data?.detail || "Sync failed"); }
+    finally { setSyncing(false); }
+  };
 
   const load = useCallback(async () => {
     const [s, o, u, a] = await Promise.all([
@@ -59,6 +70,21 @@ export default function AdminDashboard() {
     <div className="mx-auto max-w-7xl px-4 lg:px-8 py-10">
       <h1 className="font-heading text-3xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2"><ShieldCheck className="h-7 w-7 text-emerald-800" /> Admin Dashboard</h1>
       <p className="mt-2 text-slate-600 dark:text-slate-300">Moderate listings, manage verification and monitor marketplace activity.</p>
+
+      <div data-testid="admin-sheet-sync-card" className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-4">
+        <div className="flex items-center gap-3">
+          <FileSpreadsheet className="h-5 w-5 text-emerald-800" />
+          <div>
+            <p className="font-semibold text-slate-900 dark:text-white">Google Sheet &amp; Drive sync</p>
+            <p data-testid="admin-sheet-sync-status" className="text-xs text-slate-500">
+              {!sheet ? "Checking..." : !sheet.configured ? "Not connected yet" : sheet.reachable === false ? "Connected, but Google is not responding" : `Connected - ${sheet.pending} record(s) waiting to sync`}
+            </p>
+          </div>
+        </div>
+        <Button data-testid="admin-sheet-sync-button" onClick={syncSheet} disabled={syncing || !sheet?.configured} variant="outline" className="rounded-full">
+          {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sync now"}
+        </Button>
+      </div>
 
       <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {STAT_CARDS.map((s) => (

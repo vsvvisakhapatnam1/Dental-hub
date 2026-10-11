@@ -10,7 +10,9 @@ Two tabs are maintained inside the spreadsheet ("customer list"):
 """
 import os
 import json
+import base64
 import logging
+import httpx
 
 logger = logging.getLogger("dental_hub.sheets")
 
@@ -20,12 +22,13 @@ GIVER_TAB = "Giver list"
 SEEKER_HEADERS = [
     "Registered At", "Name", "Email", "Phone", "Profile Type", "Qualification",
     "Speciality", "Experience", "City", "State", "Country", "Pincode", "Address", "Preferred Location", "Looking For",
-    "Preferred Type", "Availability", "Expected Salary", "Resume/CV", "Summary",
+    "Preferred Type", "Availability", "Expected Salary", "Resume/CV", "Summary", "Record ID",
 ]
+SEEKER_CV_COL = SEEKER_HEADERS.index("Resume/CV")
 GIVER_HEADERS = [
     "Registered At", "Organisation / Name", "Contact Person", "Designation", "Email",
     "Phone", "Website", "City", "State", "Country", "Preferred Location", "Address", "Offering",
-    "Specialities", "Facilities", "Established", "Chairs", "Summary",
+    "Specialities", "Facilities", "Established", "Chairs", "Summary", "Record ID",
 ]
 
 
@@ -47,9 +50,22 @@ def _load_credentials():
         return None
 
 
-def is_configured() -> bool:
+def _gas_url() -> str:
+    return os.environ.get("GOOGLE_APPS_SCRIPT_URL", "").strip()
+
+
+def _sa_configured() -> bool:
     return bool(os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
                 and os.environ.get("GOOGLE_SHEET_ID", "").strip())
+
+
+def is_configured() -> bool:
+    return bool(_gas_url()) or _sa_configured()
+
+
+def _safe(v):
+    s = "" if v is None else str(v)
+    return "'" + s if s[:1] in ("=", "+", "-", "@") else s
 
 
 def _row_from_user(user: dict, is_giver: bool):
@@ -62,6 +78,7 @@ def _row_from_user(user: dict, is_giver: bool):
             user.get("state", ""), user.get("country", ""), user.get("preferred_location", ""), user.get("address", ""),
             j(user.get("offering")), j(user.get("specialities")), j(user.get("facilities")),
             str(user.get("established") or ""), str(user.get("chairs") or ""), user.get("summary", ""),
+            user.get("id", ""),
         ]
     return [
         user.get("created_at", ""), user.get("name", ""), user.get("email", ""),
@@ -71,7 +88,43 @@ def _row_from_user(user: dict, is_giver: bool):
         user.get("preferred_location", ""), j(user.get("looking_for")),
         user.get("preferred_type", ""), user.get("availability", ""),
         str(user.get("expected_salary") or ""), user.get("cv_filename", ""), user.get("summary", ""),
+        user.get("id", ""),
     ]
+
+
+async def _sync_gas(user: dict, is_giver: bool, cv) -> None:
+    payload = {
+        "secret": os.environ["GAS_SHARED_SECRET"],
+        "tab": GIVER_TAB if is_giver else SEEKER_TAB,
+        "headers": GIVER_HEADERS if is_giver else SEEKER_HEADERS,
+        "row": [_safe(v) for v in _row_from_user(user, is_giver)],
+        "record_id": user.get("id", ""),
+        "cv_col": None if is_giver else SEEKER_CV_COL,
+        "cv": None,
+    }
+    if cv:
+        data, mime, filename = cv
+        payload["cv"] = {"data": base64.b64encode(data).decode(), "mime": mime,
+                         "filename": f"{user.get('name', 'CV')} - {filename}"}
+    async with httpx.AsyncClient(timeout=90, follow_redirects=True) as hc:
+        r = await hc.post(_gas_url(), json=payload)
+    r.raise_for_status()
+    res = r.json()
+    if not res.get("ok"):
+        raise RuntimeError(f"Apps Script error: {res.get('error')}")
+    logger.info(f"[sheets] apps-script synced {user.get('email')} ({'dup' if res.get('duplicate') else 'new'})")
+
+
+async def ping() -> dict:
+    if not _gas_url():
+        return {"configured": _sa_configured(), "mode": "service_account" if _sa_configured() else None}
+    try:
+        async with httpx.AsyncClient(timeout=30, follow_redirects=True) as hc:
+            r = await hc.post(_gas_url(), json={"secret": os.environ["GAS_SHARED_SECRET"], "action": "ping"})
+        return {"configured": True, "mode": "apps_script", "reachable": bool(r.json().get("ok"))}
+    except Exception as e:
+        logger.warning(f"[sheets] ping failed: {e}")
+        return {"configured": True, "mode": "apps_script", "reachable": False}
 
 
 def _sync_blocking(user: dict, is_giver: bool):
@@ -113,13 +166,18 @@ def _sync_blocking(user: dict, is_giver: bool):
     logger.info(f"[sheets] appended registration to '{tab}' for {user.get('email')}")
 
 
-async def sync_registration(user: dict):
-    """Append a registration row to the correct tab. Never raises."""
+async def sync_registration(user: dict, cv=None) -> bool:
+    """Append a registration row (and CV to Drive via Apps Script). Never raises; returns success."""
     import asyncio
     if not is_configured():
-        return
+        return False
     is_giver = user.get("role") == "giver"
     try:
-        await asyncio.to_thread(_sync_blocking, user, is_giver)
+        if _gas_url():
+            await _sync_gas(user, is_giver, cv)
+        else:
+            await asyncio.to_thread(_sync_blocking, user, is_giver)
+        return True
     except Exception as e:
         logger.warning(f"[sheets] sync failed (non-blocking): {e}")
+        return False
