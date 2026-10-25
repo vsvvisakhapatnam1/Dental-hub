@@ -22,6 +22,8 @@ React + FastAPI (`/app/backend/server.py`) + MongoDB. Opaque session tokens (coo
 
 - 2026-10-11: Follow-up tracker. New Admin Dashboard tab "Follow-Ups" lists Seeker/Giver registrations with filters (Not contacted / Contacted / All), tap-to-call phone, a note, and a Contacted toggle. The admin who marked it and the time are recorded. Endpoint: PUT /api/admin/users/{id}/followup {contacted, note} saves to users.follow_up.
 
+- 2026-10-25: Added "Designer Engineering" to Giver profile types, Offering categories (Giver registration and Post Opportunity) and Home "I'm Offering" quick picks.
+
 ## Decisions
 - Login (email + Google) stays STAFF ONLY; no brute-force lockout (user choice)
 

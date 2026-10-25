@@ -9,7 +9,7 @@ export const OFFERING_CATEGORIES = [
   "Dentist Job", "Associate Dentist", "Consultant Position", "Specialist Position", "Visiting Consultant",
   "Dental Assistant", "Clinic Space", "Practice Partnership", "Practice Collaboration", "Practice for Sale/Transfer",
   "MDS Opportunity", "Course", "Fellowship", "Certification", "Training",
-  "Abroad Opportunity", "Dental Service", "Dental Lab", "Equipment", "Other Opportunity",
+  "Abroad Opportunity", "Dental Service", "Dental Lab", "Equipment", "Designer Engineering", "Other Opportunity",
 ];
 
 export const ALL_CATEGORIES = Array.from(new Set([...LOOKING_CATEGORIES, ...OFFERING_CATEGORIES]));
@@ -46,7 +46,7 @@ export const SEEKER_PROFILE_TYPES = [
 export const GIVER_PROFILE_TYPES = [
   "Dental Clinic", "Dentist / Professional", "Dental Hospital", "Dental College / Institution",
   "Training Provider", "Dental Lab", "Dental Equipment Provider", "Dental Service Provider",
-  "Recruitment Agency", "Organisation / Company", "Other",
+  "Designer Engineering", "Recruitment Agency", "Organisation / Company", "Other",
 ];
 
 export const VERIFICATION_LEVELS = [

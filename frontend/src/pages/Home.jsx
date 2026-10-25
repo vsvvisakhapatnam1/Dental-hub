@@ -14,7 +14,7 @@ import {
 import { ToothIcon } from "@/components/ToothIcon";
 
 const LOOKING_QUICK = ["Job", "Clinic Space", "Practice Partner", "Course", "MDS Admission", "Abroad Opportunity", "Dental Service", "Practice Partnership"];
-const OFFERING_QUICK = ["Dentist Job", "Associate Dentist", "Clinic Space", "Practice Partnership", "MDS Opportunity", "Course", "Dental Service", "Equipment"];
+const OFFERING_QUICK = ["Dentist Job", "Associate Dentist", "Clinic Space", "Practice Partnership", "MDS Opportunity", "Course", "Dental Service", "Equipment", "Designer Engineering"];
 
 const POPULAR = [
   { label: "Find a Job", icon: Briefcase, to: "/opportunities?mode=offering&category=Job" },
