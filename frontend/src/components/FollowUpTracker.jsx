@@ -33,7 +33,7 @@ const FollowUpRow = ({ u, onSaved }) => {
         {contacted && <p className="text-xs text-slate-400 mt-0.5" data-testid={`followup-meta-${u.id}`}>Contacted by {u.follow_up.by} on {new Date(u.follow_up.at).toLocaleString()}</p>}
       </div>
       <Input data-testid={`followup-note-${u.id}`} value={note} onChange={(e) => setNote(e.target.value)} onBlur={() => note !== (u.follow_up?.note || "") && save(contacted)} placeholder="Add a note (optional)" className="md:max-w-xs rounded-xl" />
-      <Button data-testid={`followup-toggle-${u.id}`} onClick={() => save(!contacted)} variant="outline"
+      <Button data-testid={`followup-toggle-${u.id}`} onMouseDown={(e) => e.preventDefault()} onClick={() => save(!contacted)} variant="outline"
         className={`rounded-full shrink-0 ${contacted ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-amber-300 bg-amber-50 text-amber-800"}`}>
         {contacted ? <CheckCircle2 className="h-4 w-4 mr-1" /> : <Circle className="h-4 w-4 mr-1" />}
         {contacted ? "Contacted" : "Not contacted"}

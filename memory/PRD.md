@@ -24,6 +24,8 @@ React + FastAPI (`/app/backend/server.py`) + MongoDB. Opaque session tokens (coo
 
 - 2026-10-25: Added "Designer Engineering" to Giver profile types, Offering categories (Giver registration and Post Opportunity) and Home "I'm Offering" quick picks.
 
+- 2026-10-25: Designer Engineering application. When a Giver picks the Designer Engineering profile type or offering, two mandatory fields appear: GST Number (validated GSTIN format) and Testimonials as references (1-5 entries, each with client name, contact and feedback). Validation runs on both frontend and backend. The data is shown only on the admin confidential page and in the Sheet columns; it is hidden from public directory endpoints. Fixed the follow-up note/toggle save race.
+
 ## Decisions
 - Login (email + Google) stays STAFF ONLY; no brute-force lockout (user choice)
 

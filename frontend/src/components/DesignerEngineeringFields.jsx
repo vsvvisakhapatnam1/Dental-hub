@@ -25,10 +25,10 @@ const TestimonialCard = ({ t, i, onChange, onRemove, canRemove }) => (
       {canRemove && <Button type="button" variant="ghost" size="sm" data-testid={`de-testimonial-remove-${i}`} onClick={onRemove}><Trash2 className="h-4 w-4 text-red-500" /></Button>}
     </div>
     <div className="grid sm:grid-cols-2 gap-3">
-      <Input data-testid={`de-testimonial-name-${i}`} value={t.client_name} onChange={(e) => onChange("client_name", e.target.value)} placeholder="Client / clinic name *" className="rounded-xl" />
-      <Input data-testid={`de-testimonial-contact-${i}`} value={t.contact} onChange={(e) => onChange("contact", e.target.value)} placeholder="Client phone or email *" className="rounded-xl" />
+      <Input data-testid={`de-testimonial-name-${i}`} value={t.client_name} maxLength={120} onChange={(e) => onChange("client_name", e.target.value)} placeholder="Client / clinic name *" className="rounded-xl" />
+      <Input data-testid={`de-testimonial-contact-${i}`} value={t.contact} maxLength={120} onChange={(e) => onChange("contact", e.target.value)} placeholder="Client phone or email *" className="rounded-xl" />
     </div>
-    <Textarea data-testid={`de-testimonial-feedback-${i}`} value={t.feedback} onChange={(e) => onChange("feedback", e.target.value)} rows={2} placeholder="What did the client say about your work? *" className="rounded-xl" />
+    <Textarea data-testid={`de-testimonial-feedback-${i}`} value={t.feedback} maxLength={1000} onChange={(e) => onChange("feedback", e.target.value)} rows={2} placeholder="What did the client say about your work? *" className="rounded-xl" />
   </div>
 );
 

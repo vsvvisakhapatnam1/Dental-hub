@@ -1,0 +1,40 @@
+{
+  "summary": "Tested Designer Engineering (DE) giver application (GST + Testimonials) end-to-end, privacy of new fields in public directory, admin confidential GST/Testimonials columns, and Admin Follow-Ups tab. Backend 15/15 pytest pass. Frontend: DE block shows via profile type AND via offering chip, hidden for non-DE givers; step-3 Continue blocked with correct toasts (missing/invalid GST, no complete testimonial); add up to 5 / remove when >1 works; GST auto-uppercased; full UI registration succeeded and stored gst + only complete testimonials. Confidential page shows GST + testimonials. Follow-Ups: filters, toggle, note save and persistence work individually, BUT one race bug found (typing a note then directly clicking the toggle loses the toggle). Only 3 real registrations performed (2 via API due to pytest-xdist running module fixture per worker, 1 via UI); all TEST_ users + sessions deleted afterwards.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/auth/login (vsv.visakhapatnam@gmail.com)", "issue": "Documented credential DentalHub@2026 returns 401 for vsv.visakhapatnam@gmail.com: user doc has password_changed=true (password reset via /auth/reset-password at some point), so seed no longer restores it. Other 2 staff accounts work. Update /app/memory/test_credentials.md or reset if unintended."},
+      {"endpoint": "/api/auth/register", "issue": "Testimonial fields have pydantic max_length (120/120/1000) but frontend inputs have no maxLength -> long input yields a 422 with generic validation message. Add maxLength on inputs."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "FollowUpTracker row", "issue": "Race: when admin types a note and then directly clicks the 'Not contacted' toggle, the input onBlur fires save(contacted=false) and the click fires save(true) concurrently; the blur request wins and the row stays 'Not contacted' (reproduced; DB showed contacted:false with the new note). Fix: in toggle onClick use onMouseDown preventDefault / skip blur-save when relatedTarget is the toggle, or serialize saves / send latest state.", "selector": "[data-testid=followup-note-{id}] + [data-testid=followup-toggle-{id}]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/admin/confidential givers table", "issues": ["GST Number and Testimonials columns are at the far right and cut off at 1920px; requires horizontal scroll - consider moving them earlier or making table wider/wrapping"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_designer_engineering.py", "/app/test_reports/pytest/pytest_de.xml"],
+  "action_items": [
+    "Fix FollowUpTracker note-blur vs toggle-click race",
+    "Clarify vsv.visakhapatnam@gmail.com password (password_changed=true; DentalHub@2026 no longer valid) and update test_credentials.md",
+    "Add maxLength (120/120/1000) to testimonial inputs to match backend",
+    "Minor: Register.jsx form initial state declares 'address' key twice (harmless)"
+  ],
+  "critical_code_review_comments": [
+    "FollowUpRow onBlur save + onClick save fire concurrently (no in-flight guard)",
+    "Register.jsx duplicate 'address' key in useState initializer",
+    "ProfileUpdate does not allow editing gst_number/testimonials later (DE givers cannot update them) - may be intended",
+    "Existing backend_test.py registers seeker/giver fixtures -> sends real emails each run; avoid running it routinely"
+  ],
+  "updated_files": ["/app/backend/tests/test_designer_engineering.py"],
+  "success_rate": {"backend": "100% (15/15)", "frontend": "~92% (1 race bug in follow-up tracker)"},
+  "test_credentials": "tdvsatishkumar@gmail.com / DentalHub@2026 works (admin). vsv.visakhapatnam@gmail.com / DentalHub@2026 FAILS (password_changed). Confidential password Confidential@2026 works.",
+  "seed_data_creation": "None retained; 3 TEST_ givers created and deleted with sessions.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run new tests with `-n0` (pytest.ini enables xdist; module fixtures otherwise run per worker and register multiple real users). test_designer_engineering.py reuses an existing 'TEST_DE Giver' from Mongo if present, else registers 1 (real email). Use tdvsatishkumar@gmail.com for admin. Form Field testids wrap divs: use '[data-testid=reg-email] input'.",
+  "rca of the issue": "Follow-up race: FollowUpRow note Input has onBlur={() => note changed && save(contacted)}; clicking the toggle button blurs the input first, launching PUT {contacted:false}, then onClick launches PUT {contacted:true}. Both 200; final DB state depends on server processing order and UI onSaved order -> observed contacted:false. Mitigation: onMouseDown={e=>e.preventDefault()} on toggle, or check e.relatedTarget in onBlur, or a single in-flight queue."
+}
