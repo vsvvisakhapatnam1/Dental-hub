@@ -28,7 +28,7 @@ SEEKER_CV_COL = SEEKER_HEADERS.index("Resume/CV")
 GIVER_HEADERS = [
     "Registered At", "Organisation / Name", "Contact Person", "Designation", "Email",
     "Phone", "Website", "City", "State", "Country", "Preferred Location", "Address", "Offering",
-    "Specialities", "Facilities", "Established", "Chairs", "Summary", "Record ID",
+    "Specialities", "Facilities", "Established", "Chairs", "Summary", "GST Number", "Testimonials", "Record ID",
 ]
 
 
@@ -78,6 +78,8 @@ def _row_from_user(user: dict, is_giver: bool):
             user.get("state", ""), user.get("country", ""), user.get("preferred_location", ""), user.get("address", ""),
             j(user.get("offering")), j(user.get("specialities")), j(user.get("facilities")),
             str(user.get("established") or ""), str(user.get("chairs") or ""), user.get("summary", ""),
+            user.get("gst_number") or "",
+            " | ".join(f"{t['client_name']} ({t['contact']}): {t['feedback']}" for t in user.get("testimonials") or []),
             user.get("id", ""),
         ]
     return [

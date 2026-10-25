@@ -110,11 +110,11 @@ export default function AdminConfidential() {
               <TableRow>
                 <TableHead>Organisation</TableHead><TableHead>Contact</TableHead><TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead><TableHead>City</TableHead><TableHead>Address</TableHead>
-                <TableHead>Website</TableHead><TableHead>Offering</TableHead>
+                <TableHead>Website</TableHead><TableHead>Offering</TableHead><TableHead>GST Number</TableHead><TableHead>Testimonials</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.givers.length === 0 && <TableRow><TableCell colSpan={8} className="text-center text-slate-400 py-8">No givers yet</TableCell></TableRow>}
+              {data.givers.length === 0 && <TableRow><TableCell colSpan={10} className="text-center text-slate-400 py-8">No givers yet</TableCell></TableRow>}
               {data.givers.map((u) => (
                 <TableRow key={u.id} data-testid={`conf-giver-${u.id}`}>
                   <TableCell className="font-medium">{u.org_name || u.name || "—"}</TableCell>
@@ -125,6 +125,12 @@ export default function AdminConfidential() {
                   <TableCell className="max-w-[180px] truncate" title={u.address}>{u.address || "—"}</TableCell>
                   <TableCell className="max-w-[140px] truncate">{u.website || "—"}</TableCell>
                   <TableCell className="max-w-[200px] truncate" title={(u.offering || []).join(", ")}>{(u.offering || []).join(", ") || "—"}</TableCell>
+                  <TableCell data-testid={`conf-giver-gst-${u.id}`}>{u.gst_number || "—"}</TableCell>
+                  <TableCell className="min-w-[240px] text-xs" data-testid={`conf-giver-testimonials-${u.id}`}>
+                    {(u.testimonials || []).length === 0 ? "—" : u.testimonials.map((t, i) => (
+                      <p key={i} className="mb-1"><strong>{t.client_name}</strong> ({t.contact}): {t.feedback}</p>
+                    ))}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

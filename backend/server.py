@@ -127,6 +127,16 @@ async def require_admin(request: Request) -> dict:
 
 
 # ---------------- Models ----------------
+class Testimonial(BaseModel):
+    client_name: str = Field(max_length=120)
+    contact: str = Field(max_length=120)
+    feedback: str = Field(max_length=1000)
+
+
+DESIGNER_ENGINEERING = "Designer Engineering"
+GST_RE = re.compile(r"^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$")
+
+
 class RegisterInput(BaseModel):
     email: EmailStr
     password: str
@@ -160,6 +170,8 @@ class RegisterInput(BaseModel):
     facilities: List[str] = Field(default_factory=list)
     established: Optional[str] = None
     chairs: Optional[str] = None
+    gst_number: Optional[str] = None
+    testimonials: List[Testimonial] = Field(default_factory=list)
 
 
 class LoginInput(BaseModel):
@@ -243,6 +255,17 @@ async def register(payload: RegisterInput, response: Response):
     if payload.role == "giver":
         if not (payload.address and payload.address.strip()):
             _missing.append("Address")
+    is_de = payload.role == "giver" and (payload.profile_type == DESIGNER_ENGINEERING or DESIGNER_ENGINEERING in payload.offering)
+    testimonials = [t.model_dump() for t in payload.testimonials
+                    if t.client_name.strip() and t.contact.strip() and t.feedback.strip()][:5] if is_de else []
+    gst = (payload.gst_number or "").strip().upper() if is_de else None
+    if is_de:
+        if not gst:
+            _missing.append("GST Number")
+        elif not GST_RE.match(gst):
+            raise HTTPException(status_code=400, detail="Invalid GST Number format")
+        if not testimonials:
+            _missing.append("Testimonials (at least one reference)")
     if _missing:
         raise HTTPException(status_code=400, detail="Required fields missing: " + ", ".join(_missing))
     user_id = str(uuid.uuid4())
@@ -283,6 +306,8 @@ async def register(payload: RegisterInput, response: Response):
         "facilities": payload.facilities,
         "established": payload.established,
         "chairs": payload.chairs,
+        "gst_number": gst,
+        "testimonials": testimonials,
         "photo": None,
         "verification": verification,
         "is_demo": False,
@@ -608,6 +633,7 @@ PUBLIC_PROJECTION = {
     "_id": 0, "password_hash": 0, "email": 0, "phone": 0, "address": 0,
     "pincode": 0, "cv_url": 0, "cv_filename": 0, "contact_person": 0,
     "designation": 0, "preferred_location": 0, "expected_salary": 0,
+    "gst_number": 0, "testimonials": 0, "follow_up": 0,
 }
 
 
@@ -1114,6 +1140,7 @@ async def admin_confidential(payload: ConfidentialRequest, request: Request, adm
             "org_name": u.get("org_name"), "contact_person": u.get("contact_person"),
             "designation": u.get("designation"), "website": u.get("website"),
             "cv_url": u.get("cv_url"), "cv_filename": u.get("cv_filename"),
+            "gst_number": u.get("gst_number"), "testimonials": u.get("testimonials", []),
             "created_at": u.get("created_at"),
         }
 

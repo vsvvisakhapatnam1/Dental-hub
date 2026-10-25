@@ -15,6 +15,7 @@ import {
   Search, Briefcase, ArrowRight, ArrowLeft, Loader2, CheckCircle2,
 } from "lucide-react";
 import { ToothIcon } from "@/components/ToothIcon";
+import { DesignerEngineeringFields, isDesignerEngineering, validateDesignerEngineering, EMPTY_TESTIMONIAL } from "@/components/DesignerEngineeringFields";
 import {
   LOOKING_CATEGORIES, OFFERING_CATEGORIES, SPECIALITIES, QUALIFICATIONS, EXPERIENCE_LEVELS,
   EMPLOYMENT_TYPES, AVAILABILITY, STATES, CITIES, SEEKER_PROFILE_TYPES, GIVER_PROFILE_TYPES, PREFERRED_LOCATIONS,
@@ -54,7 +55,9 @@ export default function Register() {
     qualification: "", speciality: "", experience: "", preferred_type: "", preferred_location: "", availability: "", expected_salary: "",
     summary: "", org_name: "", contact_person: "", designation: "", website: "", address: "",
     specialities: [], facilities_text: "", established: "", chairs: "", password: "", confirm: "", agree: false,
+    gst_number: "", testimonials: [{ ...EMPTY_TESTIMONIAL }],
   });
+  const isDE = role === "giver" && isDesignerEngineering(form);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const toggle = (k, v) => setForm((f) => ({ ...f, [k]: f[k].includes(v) ? f[k].filter((x) => x !== v) : [...f[k], v] }));
@@ -74,6 +77,7 @@ export default function Register() {
       if (role === "seeker" && !form.cv_url) { toast.error("Please upload your Resume / CV"); return false; }
     }
     if (step === 3 && !form.preferred_location) { toast.error("Preferred Location is required"); return false; }
+    if (step === 3 && isDE) { const err = validateDesignerEngineering(form); if (err) { toast.error(err); return false; } }
     return true;
   };
   const next = () => { if (!validateBeforeNext()) return; setStep((s) => Math.min(s + 1, steps.length - 1)); };
@@ -90,6 +94,7 @@ export default function Register() {
     if (role === "seeker" && !form.pincode.trim()) miss.push("Pincode");
     if (role === "seeker" && !form.cv_url) miss.push("Resume/CV");
     if (miss.length) { toast.error("Please fill required fields: " + miss.join(", ")); return; }
+    if (isDE) { const err = validateDesignerEngineering(form); if (err) { toast.error(err); return; } }
     if (!form.agree) { toast.error("Please accept the Terms & Privacy Policy"); return; }
     if (form.password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
     if (form.password !== form.confirm) { toast.error("Passwords do not match"); return; }
@@ -108,6 +113,8 @@ export default function Register() {
         website: form.website, address: form.address, specialities: form.specialities,
         facilities: form.facilities_text ? form.facilities_text.split(",").map((x) => x.trim()).filter(Boolean) : [],
         established: form.established, chairs: form.chairs,
+        gst_number: isDE ? form.gst_number.trim().toUpperCase() : null,
+        testimonials: isDE ? form.testimonials.filter((t) => t.client_name.trim() && t.contact.trim() && t.feedback.trim()) : [],
       };
       const u = await register(payload);
       toast.success("Account created! Welcome to Dental Opportunity Hub.");
@@ -242,6 +249,7 @@ export default function Register() {
             </div>
             <Field label="Facilities (comma-separated)" testid="reg-facilities"><Input value={form.facilities_text} onChange={(e) => set("facilities_text", e.target.value)} className="rounded-xl" placeholder="Digital X-Ray, OPG, RVG" /></Field>
             <Field label="About the Organisation" testid="reg-summary"><Textarea value={form.summary} onChange={(e) => set("summary", e.target.value)} className="rounded-xl" rows={3} /></Field>
+            {isDE && <DesignerEngineeringFields form={form} setForm={setForm} />}
           </div>
         )}
 
