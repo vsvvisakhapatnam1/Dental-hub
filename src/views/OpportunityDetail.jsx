@@ -40,8 +40,8 @@ export default function OpportunityDetail() {
     } finally { setApplying(false); }
   };
 
-  if (loading) return <div className="min-h-[60vh] grid place-items-center"><Loader2 className="h-8 w-8 animate-spin text-emerald-700" /></div>;
-  if (!opp) return <div className="min-h-[60vh] grid place-items-center text-slate-500">Opportunity not found. <Link to="/opportunities" className="text-emerald-800 ml-1">Browse all</Link></div>;
+  if (loading) return <div className="min-h-[60vh] grid place-items-center"><Loader2 className="h-8 w-8 animate-spin text-[#1D70B8]" /></div>;
+  if (!opp) return <div className="min-h-[60vh] grid place-items-center text-slate-500">Opportunity not found. <Link to="/opportunities" className="text-[#1D70B8] ml-1 font-semibold">Browse all</Link></div>;
 
   const looking = opp.mode === "looking";
   const waLink = opp.contact_method === "whatsapp" && opp.contact_value ? `https://wa.me/${opp.contact_value.replace(/[^0-9]/g, "")}?text=${encodeURIComponent("Hi, I'm interested in your listing: " + opp.title)}` : null;
@@ -49,11 +49,11 @@ export default function OpportunityDetail() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 lg:px-8 py-10">
-      <button data-testid="back-btn" onClick={() => navigate(-1)} className="text-sm text-slate-500 inline-flex items-center gap-1 mb-6"><ArrowLeft className="h-4 w-4" /> Back</button>
+      <button data-testid="back-btn" onClick={() => navigate(-1)} className="text-sm text-slate-500 inline-flex items-center gap-1 mb-6 hover:text-[#1D70B8] transition-colors"><ArrowLeft className="h-4 w-4" /> Back</button>
 
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${looking ? "bg-blue-50 text-blue-700" : "bg-emerald-50 text-emerald-800"}`}>{looking ? "Looking" : "Offering"} · {opp.category}</span>
+          <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${looking ? "bg-blue-50 text-[#1D70B8] border border-blue-200" : "bg-[#FBF8F5] text-[#5C3A21] border border-[#5C3A21]/30"}`}>{looking ? "Looking" : "Offering"} · {opp.category}</span>
           <h1 className="mt-3 font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">{opp.title}</h1>
           <p className="mt-2 text-lg text-slate-600 dark:text-slate-300">{opp.org_name || opp.poster_name}</p>
           <div className="mt-3"><VerificationBadge status={opp.verification_status} size="md" /></div>
@@ -80,19 +80,19 @@ export default function OpportunityDetail() {
 
             <Dialog>
               <DialogTrigger asChild>
-                <Button data-testid="apply-btn" disabled={applied} className="mt-4 w-full rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white">
+                <Button data-testid="apply-btn" disabled={applied} className="mt-4 w-full rounded-xl bg-[#1D70B8] hover:bg-[#16508C] text-white">
                   {applied ? <><CheckCircle2 className="h-4 w-4 mr-1" /> Applied</> : <><Send className="h-4 w-4 mr-1" /> Apply Now</>}
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-white dark:bg-slate-900">
                 <DialogHeader><DialogTitle>Apply / Express Interest</DialogTitle></DialogHeader>
                 {applied ? (
-                  <div className="py-6 text-center"><CheckCircle2 className="h-10 w-10 text-emerald-600 mx-auto" /><p className="mt-2 font-semibold">Application submitted!</p></div>
+                  <div className="py-6 text-center"><CheckCircle2 className="h-10 w-10 text-[#1D70B8] mx-auto" /><p className="mt-2 font-semibold">Application submitted!</p></div>
                 ) : (
                   <>
                     <Textarea data-testid="apply-message" value={msg} onChange={(e) => setMsg(e.target.value)} rows={4} className="rounded-xl" placeholder="Add a short message (optional)…" />
                     <DialogFooter>
-                      <Button data-testid="apply-submit" onClick={apply} disabled={applying} className="rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white">
+                      <Button data-testid="apply-submit" onClick={apply} disabled={applying} className="rounded-xl bg-[#1D70B8] hover:bg-[#16508C] text-white">
                         {applying ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit Application"}
                       </Button>
                     </DialogFooter>
@@ -101,9 +101,9 @@ export default function OpportunityDetail() {
               </DialogContent>
             </Dialog>
 
-            {waLink && <a href={waLink} target="_blank" rel="noreferrer"><Button data-testid="whatsapp-btn" variant="outline" className="mt-3 w-full rounded-xl"><MessageCircle className="h-4 w-4 mr-1" /> WhatsApp</Button></a>}
-            {mailLink && <a href={mailLink}><Button data-testid="email-btn" variant="outline" className="mt-3 w-full rounded-xl"><Mail className="h-4 w-4 mr-1" /> Email</Button></a>}
-            {opp.poster_id && <Button data-testid="view-poster" variant="ghost" onClick={() => navigate(`/profile/${opp.poster_id}`)} className="mt-3 w-full rounded-xl text-emerald-800">View Profile</Button>}
+            {waLink && <a href={waLink} target="_blank" rel="noreferrer"><Button data-testid="whatsapp-btn" variant="outline" className="mt-3 w-full rounded-xl border-slate-200 hover:border-[#1D70B8]"><MessageCircle className="h-4 w-4 mr-1 text-[#25D366]" /> WhatsApp</Button></a>}
+            {mailLink && <a href={mailLink}><Button data-testid="email-btn" variant="outline" className="mt-3 w-full rounded-xl border-slate-200 hover:border-[#1D70B8]"><Mail className="h-4 w-4 mr-1 text-[#1D70B8]" /> Email</Button></a>}
+            {opp.poster_id && <Button data-testid="view-poster" variant="ghost" onClick={() => navigate(`/profile/${opp.poster_id}`)} className="mt-3 w-full rounded-xl text-[#1D70B8] hover:bg-blue-50">View Profile</Button>}
           </div>
         </aside>
       </div>
@@ -115,7 +115,7 @@ function Info({ icon: Icon, label, value }) {
   if (!value || value === "-") return null;
   return (
     <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-3 flex items-center gap-3">
-      <span className="grid place-items-center h-9 w-9 rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400"><Icon className="h-4 w-4" /></span>
+      <span className="grid place-items-center h-9 w-9 rounded-lg bg-blue-50 dark:bg-slate-800 text-[#1D70B8]"><Icon className="h-4 w-4" /></span>
       <div><p className="text-xs text-slate-400">{label}</p><p className="text-sm font-medium text-slate-800 dark:text-slate-100">{value}</p></div>
     </div>
   );
@@ -124,7 +124,7 @@ function Info({ icon: Icon, label, value }) {
 function Section({ icon: Icon, title, children }) {
   return (
     <div className="mt-8">
-      <h3 className="font-heading font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2"><Icon className="h-5 w-5 text-emerald-700" /> {title}</h3>
+      <h3 className="font-heading font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2"><Icon className="h-5 w-5 text-[#1D70B8]" /> {title}</h3>
       <p className="mt-2 text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">{children}</p>
     </div>
   );

@@ -48,7 +48,7 @@ export default function DentistDirectory() {
       </div>
 
       {loading ? (
-        <div className="min-h-[40vh] grid place-items-center"><Loader2 className="h-8 w-8 animate-spin text-emerald-700" /></div>
+        <div className="min-h-[40vh] grid place-items-center"><Loader2 className="h-8 w-8 animate-spin text-[#1D70B8]" /></div>
       ) : list.length === 0 ? (
         <div className="min-h-[40vh] grid place-items-center text-center" data-testid="dentist-empty"><div><Frown className="h-10 w-10 mx-auto text-slate-300" /><p className="mt-3 text-slate-500">No dentists found.</p></div></div>
       ) : (
@@ -56,9 +56,9 @@ export default function DentistDirectory() {
           {list.map((d, i) => (
             <motion.div key={d.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i * 0.04, 0.3) }}
               data-testid={`dentist-card-${d.id}`} onClick={() => navigate(`/profile/${d.id}`)}
-              className="cursor-pointer rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 hover:shadow-lg hover:-translate-y-1 transition-all">
+              className="cursor-pointer rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 hover:shadow-lg hover:border-[#1D70B8]/40 hover:-translate-y-1 transition-all">
               <div className="flex items-center gap-3">
-                <span className="grid place-items-center h-12 w-12 rounded-full bg-emerald-800 text-white font-semibold overflow-hidden">
+                <span className="grid place-items-center h-12 w-12 rounded-full bg-[#1D70B8] text-white font-semibold overflow-hidden shadow-xs">
                   {d.photo ? <img src={d.photo} alt={d.name} className="h-full w-full object-cover" /> : (d.name || "D").charAt(0)}
                 </span>
                 <div>
@@ -67,9 +67,9 @@ export default function DentistDirectory() {
                 </div>
               </div>
               <div className="mt-4 space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
-                {d.speciality && <p className="inline-flex items-center gap-1"><GraduationCap className="h-4 w-4 text-emerald-700" /> {d.speciality}</p>}
-                {d.city && <p className="inline-flex items-center gap-1"><MapPin className="h-4 w-4 text-emerald-700" /> {d.city}, {d.state}</p>}
-                {d.experience && <p className="inline-flex items-center gap-1"><UserRound className="h-4 w-4 text-emerald-700" /> {d.experience}</p>}
+                {d.speciality && <p className="inline-flex items-center gap-1"><GraduationCap className="h-4 w-4 text-[#1D70B8]" /> {d.speciality}</p>}
+                {d.city && <p className="inline-flex items-center gap-1"><MapPin className="h-4 w-4 text-[#1D70B8]" /> {d.city}, {d.state}</p>}
+                {d.experience && <p className="inline-flex items-center gap-1"><UserRound className="h-4 w-4 text-[#5C3A21]" /> {d.experience}</p>}
               </div>
               <div className="mt-4"><VerificationBadge status={topVerification(d.verification)} /></div>
             </motion.div>

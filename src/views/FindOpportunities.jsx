@@ -92,7 +92,7 @@ export default function FindOpportunities() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input data-testid="search-input" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && applyQuery()} placeholder="Search title, clinic, speciality…" className="pl-10 rounded-xl h-11" />
         </div>
-        <Button data-testid="search-btn" onClick={applyQuery} className="rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white h-11 px-6">Search</Button>
+        <Button data-testid="search-btn" onClick={applyQuery} className="rounded-xl bg-[#1D70B8] hover:bg-[#16508C] text-white h-11 px-6 font-semibold shadow-xs">Search</Button>
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" data-testid="mobile-filters-btn" className="lg:hidden rounded-xl h-11"><SlidersHorizontal className="h-4 w-4" /></Button>
@@ -114,7 +114,7 @@ export default function FindOpportunities() {
 
         <div className="lg:col-span-9">
           {loading ? (
-            <div className="min-h-[40vh] grid place-items-center"><Loader2 className="h-8 w-8 animate-spin text-emerald-700" /></div>
+            <div className="min-h-[40vh] grid place-items-center"><Loader2 className="h-8 w-8 animate-spin text-[#1D70B8]" /></div>
           ) : opps.length === 0 ? (
             <div className="min-h-[40vh] grid place-items-center text-center" data-testid="empty-state">
               <div>

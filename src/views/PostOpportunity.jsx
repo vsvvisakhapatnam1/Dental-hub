@@ -54,11 +54,11 @@ export default function PostOpportunity() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 lg:px-8 py-12">
-      <h1 className="font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2"><PlusCircle className="h-8 w-8 text-amber-600" /> Post an Opportunity</h1>
+      <h1 className="font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2"><PlusCircle className="h-8 w-8 text-[#1D70B8]" /> Post an Opportunity</h1>
       <p className="mt-2 text-slate-600 dark:text-slate-300">Listings go live after admin review. The form adapts to your chosen category.</p>
 
       <div className="mt-8 flex items-center gap-2">
-        {steps.map((s, i) => <div key={s} className="flex-1"><div className={`h-1.5 rounded-full ${i <= step ? "bg-amber-600" : "bg-slate-200 dark:bg-slate-700"}`} /></div>)}
+        {steps.map((s, i) => <div key={s} className="flex-1"><div className={`h-1.5 rounded-full ${i <= step ? "bg-[#1D70B8]" : "bg-slate-200 dark:bg-slate-700"}`} /></div>)}
       </div>
       <h2 className="mt-6 font-heading text-2xl font-bold text-slate-900 dark:text-white">{steps[step]}</h2>
 
@@ -127,9 +127,9 @@ export default function PostOpportunity() {
         <div className="mt-8 flex items-center justify-between">
           <Button type="button" variant="ghost" data-testid="post-back" onClick={back} disabled={step === 0} className="rounded-full"><ArrowLeft className="h-4 w-4 mr-1" /> Back</Button>
           {step < steps.length - 1 ? (
-            <Button type="button" data-testid="post-next" onClick={next} className="rounded-full bg-emerald-800 hover:bg-emerald-900 text-white">Continue <ArrowRight className="h-4 w-4 ml-1" /></Button>
+            <Button type="button" data-testid="post-next" onClick={next} className="rounded-full bg-[#1D70B8] hover:bg-[#16508C] text-white">Continue <ArrowRight className="h-4 w-4 ml-1" /></Button>
           ) : (
-            <Button type="button" data-testid="post-submit" onClick={submit} disabled={busy} className="rounded-full bg-amber-600 hover:bg-amber-700 text-white">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CheckCircle2 className="h-4 w-4 mr-1" /> Submit Opportunity</>}</Button>
+            <Button type="button" data-testid="post-submit" onClick={submit} disabled={busy} className="rounded-full bg-[#5C3A21] hover:bg-[#432613] text-white">{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CheckCircle2 className="h-4 w-4 mr-1" /> Submit Opportunity</>}</Button>
           )}
         </div>
       </motion.div>

@@ -12,25 +12,39 @@ body {
 
 @layer base {
     :root {
-        --background: 40 43% 98%;
+        /* Crisp White Background */
+        --background: 0 0% 100%;
+        /* Deep Black/Slate Text */
         --foreground: 222 47% 11%;
+
+        /* White Cards & Popovers */
         --card: 0 0% 100%;
         --card-foreground: 222 47% 11%;
         --popover: 0 0% 100%;
         --popover-foreground: 222 47% 11%;
-        --primary: 162 84% 20%;
-        --primary-foreground: 152 76% 96%;
-        --secondary: 40 30% 94%;
-        --secondary-foreground: 222 47% 11%;
-        --muted: 40 20% 94%;
-        --muted-foreground: 215 16% 47%;
-        --accent: 32 95% 44%;
+
+        /* Brand Dental Blue matching logo (#1D70B8) */
+        --primary: 208 73% 42%;
+        --primary-foreground: 0 0% 100%;
+
+        /* Warm Brown & Sandy Accents matching logo mascot (#78350F / #5C3A21) */
+        --secondary: 30 25% 96%;
+        --secondary-foreground: 25 50% 20%;
+
+        /* Soft Muted Backgrounds */
+        --muted: 210 20% 96%;
+        --muted-foreground: 215 16% 40%;
+
+        /* Logo Brand Warm Brown / Amber Accent */
+        --accent: 25 65% 32%;
         --accent-foreground: 0 0% 100%;
+
         --destructive: 0 72% 51%;
         --destructive-foreground: 0 0% 98%;
-        --border: 214 20% 88%;
-        --input: 214 20% 88%;
-        --ring: 162 84% 25%;
+
+        --border: 214 32% 91%;
+        --input: 214 32% 91%;
+        --ring: 208 73% 42%;
         --radius: 0.9rem;
     }
     .dark {
@@ -40,19 +54,19 @@ body {
         --card-foreground: 210 40% 98%;
         --popover: 217 33% 13%;
         --popover-foreground: 210 40% 98%;
-        --primary: 160 84% 39%;
-        --primary-foreground: 222 47% 8%;
+        --primary: 208 73% 50%;
+        --primary-foreground: 0 0% 100%;
         --secondary: 217 33% 18%;
         --secondary-foreground: 210 40% 98%;
         --muted: 217 33% 18%;
         --muted-foreground: 215 20% 65%;
-        --accent: 32 95% 50%;
-        --accent-foreground: 222 47% 8%;
+        --accent: 28 65% 45%;
+        --accent-foreground: 0 0% 100%;
         --destructive: 0 62% 45%;
         --destructive-foreground: 0 0% 98%;
         --border: 217 33% 22%;
         --input: 217 33% 22%;
-        --ring: 160 84% 39%;
+        --ring: 208 73% 50%;
     }
 }
 
@@ -68,12 +82,13 @@ body {
 .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
 .font-mono { font-family: 'JetBrains Mono', monospace; }
 
+/* Subtle blue brand grid */
 .hub-grid-bg {
-    background-image: radial-gradient(hsl(162 84% 20% / 0.06) 1px, transparent 1px);
+    background-image: radial-gradient(hsl(208 73% 42% / 0.06) 1px, transparent 1px);
     background-size: 22px 22px;
 }
 
-::selection { background: hsl(32 95% 44% / 0.25); }
+::selection { background: hsl(208 73% 42% / 0.22); }
 
 @layer base {
     [data-debug-wrapper="true"] { display: contents !important; }
