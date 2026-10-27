@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import api, { setToken } from "@/lib/api";
 
@@ -21,7 +23,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (window.location.hash?.includes("session_id=")) {
+    if (typeof window !== "undefined" && window.location.hash?.includes("session_id=")) {
       setLoading(false);
       return;
     }

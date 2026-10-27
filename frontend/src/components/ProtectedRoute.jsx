@@ -1,3 +1,5 @@
+"use client";
+
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";

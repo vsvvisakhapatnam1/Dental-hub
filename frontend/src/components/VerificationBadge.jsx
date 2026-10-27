@@ -1,3 +1,5 @@
+"use client";
+
 import { CheckCircle2, ShieldCheck, Building2, BadgeCheck, Smartphone, Mail } from "lucide-react";
 
 const MAP = {

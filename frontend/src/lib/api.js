@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.REACT_APP_BACKEND_URL ||
+  "http://localhost:8000";
 export const API = `${BACKEND_URL}/api`;
 
 const api = axios.create({ baseURL: API, withCredentials: true });
@@ -8,6 +11,7 @@ const api = axios.create({ baseURL: API, withCredentials: true });
 const TOKEN_KEY = "doh_token";
 
 export function setToken(token) {
+  if (typeof window === "undefined") return;
   if (token) {
     localStorage.setItem(TOKEN_KEY, token);
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -17,8 +21,10 @@ export function setToken(token) {
   }
 }
 
-const existing = localStorage.getItem(TOKEN_KEY);
-if (existing) api.defaults.headers.common["Authorization"] = `Bearer ${existing}`;
+if (typeof window !== "undefined") {
+  const existing = localStorage.getItem(TOKEN_KEY);
+  if (existing) api.defaults.headers.common["Authorization"] = `Bearer ${existing}`;
+}
 
 export function formatApiError(detail) {
   if (detail == null) return "Something went wrong. Please try again.";
