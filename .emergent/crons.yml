@@ -1,9 +1,0 @@
-crons:
-  - name: daily-signup-digest
-    description: "Emails the team yesterday's new Seekers and Givers with phone and city at 9:00am IST"
-    cron: "0 9 * * *"
-    timezone: "Asia/Kolkata"
-    endpoint: "{{BASE_URL}}/api/cron/signup-digest"
-    method: POST
-    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
-    enabled: true
