@@ -54,18 +54,18 @@ export function useNavigate() {
 // --- useLocation Hook ---
 export function useLocation() {
   const pathname = useNextPathname() || "/";
-  const searchParams = useNextSearchParams();
-  const search = searchParams ? `?${searchParams.toString()}` : "";
+  const [search, setSearch] = React.useState("");
   const [hash, setHash] = React.useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      setSearch(window.location.search || "");
       setHash(window.location.hash || "");
       const onHashChange = () => setHash(window.location.hash || "");
       window.addEventListener("hashchange", onHashChange);
       return () => window.removeEventListener("hashchange", onHashChange);
     }
-  }, []);
+  }, [pathname]);
 
   return useMemo(
     () => ({

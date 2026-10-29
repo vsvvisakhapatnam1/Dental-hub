@@ -3,13 +3,13 @@
 import { CheckCircle2, ShieldCheck, Building2, BadgeCheck, Smartphone, Mail } from "lucide-react";
 
 const MAP = {
-  organisation: { label: "Organisation Verified", cls: "bg-[#FBF8F5] text-[#5C3A21] border-[#5C3A21]/30", Icon: BadgeCheck },
-  clinic: { label: "Clinic Verified", cls: "bg-sky-50 text-[#1D70B8] border-sky-300", Icon: Building2 },
-  credential: { label: "Credential Verified", cls: "bg-blue-50 text-[#16508C] border-blue-300", Icon: ShieldCheck },
-  qualification_submitted: { label: "Qualification Submitted", cls: "bg-sky-50 text-[#0284C7] border-sky-200", Icon: CheckCircle2 },
-  email: { label: "Email Verified", cls: "bg-slate-50 text-slate-800 border-slate-200", Icon: Mail },
-  mobile: { label: "Mobile Verified", cls: "bg-slate-50 text-slate-800 border-slate-200", Icon: Smartphone },
-  none: { label: "Registered", cls: "bg-slate-100 text-slate-600 border-slate-200", Icon: CheckCircle2 },
+  organisation: { label: "Organisation Verified", cls: "bg-teal-50 text-teal-800 border-teal-200", Icon: BadgeCheck },
+  clinic: { label: "Clinic Verified", cls: "bg-sky-50 text-sky-800 border-sky-200", Icon: Building2 },
+  credential: { label: "Credential Verified", cls: "bg-teal-50 text-teal-700 border-teal-200", Icon: ShieldCheck },
+  qualification_submitted: { label: "Qualification Submitted", cls: "bg-sky-50 text-sky-700 border-sky-200", Icon: CheckCircle2 },
+  email: { label: "Email Verified", cls: "bg-slate-50 text-slate-700 border-slate-200", Icon: Mail },
+  mobile: { label: "Mobile Verified", cls: "bg-slate-50 text-slate-700 border-slate-200", Icon: Smartphone },
+  none: { label: "Registered", cls: "bg-slate-50 text-slate-600 border-slate-200", Icon: CheckCircle2 },
 };
 
 export function VerificationBadge({ status = "none", size = "sm", testid }) {

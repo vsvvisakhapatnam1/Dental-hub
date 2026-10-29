@@ -1,102 +1,102 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-    margin: 0;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+@layer base {
+  :root {
+    /* Pure White Clinical Theme — Medical Teal & Doctor Sky Blue */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 175 84% 32%;            /* #0D9488 Clinical Medical Teal */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 199 96% 39%;          /* #0284C7 Doctor Sky-Ocean Blue */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 180 33% 98%;
+    --muted-foreground: 215 16% 42%;
+    --accent: 173 80% 96%;             /* #F0FDFA Clinical Mint Tint */
+    --accent-foreground: 175 84% 26%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 32% 91%;
+    --input: 210 32% 91%;
+    --ring: 175 84% 32%;
+    --chart-1: 175 84% 32%;
+    --chart-2: 199 96% 39%;
+    --chart-3: 160 84% 39%;
+    --chart-4: 217 91% 60%;
+    --chart-5: 190 90% 40%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 10%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 10%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 173 80% 40%;
+    --primary-foreground: 222 47% 7%;
+    --secondary: 199 89% 48%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 217 33% 15%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 15%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 173 80% 40%;
+  }
 }
 
 @layer base {
-    :root {
-        /* Crisp White Background */
-        --background: 0 0% 100%;
-        /* Deep Black/Slate Text */
-        --foreground: 222 47% 11%;
+  * {
+    @apply border-border;
+  }
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    scroll-behavior: smooth;
+    background-color: #ffffff;
+  }
+  body {
+    @apply bg-white text-slate-900 antialiased;
+    background-color: #ffffff;
+    color: #0f172a;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  h1, h2, h3, h4, .font-heading {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.025em;
+  }
+}
 
-        /* White Cards & Popovers */
-        --card: 0 0% 100%;
-        --card-foreground: 222 47% 11%;
-        --popover: 0 0% 100%;
-        --popover-foreground: 222 47% 11%;
+/* Subtle clinical dot pattern on white background */
+.dental-grid-bg {
+  background-color: #ffffff;
+  background-image: radial-gradient(rgba(13, 148, 136, 0.11) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
 
-        /* Brand Dental Blue matching logo (#1D70B8) */
-        --primary: 208 73% 42%;
-        --primary-foreground: 0 0% 100%;
-
-        /* Warm Brown & Sandy Accents matching logo mascot (#78350F / #5C3A21) */
-        --secondary: 30 25% 96%;
-        --secondary-foreground: 25 50% 20%;
-
-        /* Soft Muted Backgrounds */
-        --muted: 210 20% 96%;
-        --muted-foreground: 215 16% 40%;
-
-        /* Logo Brand Warm Brown / Amber Accent */
-        --accent: 25 65% 32%;
-        --accent-foreground: 0 0% 100%;
-
-        --destructive: 0 72% 51%;
-        --destructive-foreground: 0 0% 98%;
-
-        --border: 214 32% 91%;
-        --input: 214 32% 91%;
-        --ring: 208 73% 42%;
-        --radius: 0.9rem;
-    }
-    .dark {
-        --background: 222 47% 8%;
-        --foreground: 210 40% 98%;
-        --card: 217 33% 15%;
-        --card-foreground: 210 40% 98%;
-        --popover: 217 33% 13%;
-        --popover-foreground: 210 40% 98%;
-        --primary: 208 73% 50%;
-        --primary-foreground: 0 0% 100%;
-        --secondary: 217 33% 18%;
-        --secondary-foreground: 210 40% 98%;
-        --muted: 217 33% 18%;
-        --muted-foreground: 215 20% 65%;
-        --accent: 28 65% 45%;
-        --accent-foreground: 0 0% 100%;
-        --destructive: 0 62% 45%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 217 33% 22%;
-        --input: 217 33% 22%;
-        --ring: 208 73% 50%;
-    }
+/* Glass surface */
+.glass {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.92);
+}
+.dark .glass {
+  background: rgba(15, 23, 42, 0.82);
 }
 
 @layer base {
-    * {
-        @apply border-border;
-    }
-    body {
-        @apply bg-background text-foreground;
-    }
-}
-
-.font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
-.font-mono { font-family: 'JetBrains Mono', monospace; }
-
-/* Subtle blue brand grid */
-.hub-grid-bg {
-    background-image: radial-gradient(hsl(208 73% 42% / 0.06) 1px, transparent 1px);
-    background-size: 22px 22px;
-}
-
-::selection { background: hsl(208 73% 42% / 0.22); }
-
-@layer base {
-    [data-debug-wrapper="true"] { display: contents !important; }
-}
-
-@media print {
-    header, footer { display: none !important; }
-    .no-print { display: none !important; }
-    .print-flyer { box-shadow: none !important; }
-    body { background: #fff !important; }
+  [data-debug-wrapper="true"] {
+    display: contents !important;
+  }
 }
