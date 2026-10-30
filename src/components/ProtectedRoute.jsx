@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 export function ProtectedRoute({ children, adminOnly = false }) {
   const { user, loading } = useAuth();
 
-  if (loading || user === null) {
+  if (loading) {
     return (
       <div className="min-h-[60vh] grid place-items-center">
         <Loader2 className="h-8 w-8 animate-spin text-teal-600" />

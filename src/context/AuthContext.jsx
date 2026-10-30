@@ -10,14 +10,20 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
+    // Safety failsafe: ensure loading never hangs past 2.5s on mobile networks
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+    }, 2500);
+
     try {
       const { data } = await api.get("/auth/me");
-      setUser(data);
-      return data;
+      setUser(data || false);
+      return data || false;
     } catch {
       setUser(false);
       return false;
     } finally {
+      clearTimeout(safetyTimer);
       setLoading(false);
     }
   }, []);

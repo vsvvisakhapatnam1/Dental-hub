@@ -83,6 +83,11 @@ export default function AdminDashboard() {
   const [userRoleFilter, setUserRoleFilter] = useState("all");
 
   const load = useCallback(async () => {
+    // Mobile safety timer: ensure dashboard loading state never hangs past 2.5s
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+    }, 2500);
+
     try {
       const [s, o, u, a] = await Promise.all([
         api.get("/admin/stats"),
@@ -90,13 +95,14 @@ export default function AdminDashboard() {
         api.get("/admin/users"),
         api.get("/admin/applications"),
       ]);
-      setStats(s.data);
-      setOpps(o.data || []);
-      setUsers(u.data || []);
-      setApps(a.data || []);
+      setStats(s?.data || null);
+      setOpps(o?.data || []);
+      setUsers(u?.data || []);
+      setApps(a?.data || []);
     } catch {
       /* ignore */
     } finally {
+      clearTimeout(safetyTimer);
       setLoading(false);
     }
   }, []);

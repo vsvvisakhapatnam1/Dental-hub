@@ -304,6 +304,48 @@ if (typeof window !== "undefined" && isSupabaseConfigured()) {
   }, 1500);
 }
 
+// In-memory short-lived cache & in-flight de-duplication for admin queries
+let adminDataCache = null;
+let adminDataCacheTime = 0;
+let adminDataInFlightPromise = null;
+
+async function getAdminDataFromSupabase(sb) {
+  if (!sb) return null;
+  const now = Date.now();
+  if (adminDataCache && now - adminDataCacheTime < 5000) {
+    return adminDataCache;
+  }
+  if (adminDataInFlightPromise) {
+    return adminDataInFlightPromise;
+  }
+
+  const timeoutPromise = new Promise((resolve) =>
+    setTimeout(() => resolve(null), 2500)
+  );
+
+  const fetchPromise = Promise.all([
+    sb.from("users").select("*").order("created_at", { ascending: false }),
+    sb.from("opportunities").select("*").order("created_at", { ascending: false }),
+    sb.from("applications").select("*").order("created_at", { ascending: false }),
+  ])
+    .then(([uRes, oRes, aRes]) => {
+      adminDataCache = {
+        users: uRes?.data || [],
+        opps: oRes?.data || [],
+        apps: aRes?.data || [],
+      };
+      adminDataCacheTime = Date.now();
+      return adminDataCache;
+    })
+    .catch(() => null)
+    .finally(() => {
+      adminDataInFlightPromise = null;
+    });
+
+  adminDataInFlightPromise = Promise.race([fetchPromise, timeoutPromise]);
+  return adminDataInFlightPromise;
+}
+
 // ============================================================================
 // CORE API ROUTER (SUPABASE REAL-TIME FIRST + LOCAL MIRROR)
 // ============================================================================
@@ -1113,35 +1155,30 @@ async function handleApiCall(method, url, data = null, config = {}) {
 
   if (cleanUrl.startsWith("/admin") && supabase) {
     try {
-      const [uRes, oRes, aRes] = await Promise.all([
-        supabase.from("users").select("*").order("created_at", { ascending: false }),
-        supabase.from("opportunities").select("*").order("created_at", { ascending: false }),
-        supabase.from("applications").select("*").order("created_at", { ascending: false }),
-      ]);
-
-      if (!uRes.error && Array.isArray(uRes.data)) {
+      const sbData = await getAdminDataFromSupabase(supabase);
+      if (sbData) {
         supabaseConnected = true;
-        if (uRes.data.length > 0) {
-          const sbEmails = new Set(uRes.data.map((u) => (u.email || "").toLowerCase()));
+        if (Array.isArray(sbData.users) && sbData.users.length > 0) {
+          const sbEmails = new Set(sbData.users.map((u) => (u.email || "").toLowerCase()));
           allUsers = [
-            ...uRes.data.filter((u) => u.role !== "admin"),
+            ...sbData.users.filter((u) => u.role !== "admin"),
             ...allUsers.filter((loc) => !sbEmails.has((loc.email || "").toLowerCase())),
           ];
         }
-      }
-      if (!oRes.error && Array.isArray(oRes.data) && oRes.data.length > 0) {
-        const sbIds = new Set(oRes.data.map((o) => o.id));
-        allOpps = [
-          ...oRes.data,
-          ...allOpps.filter((loc) => !sbIds.has(toUuid(loc.id)) && !sbIds.has(loc.id)),
-        ];
-      }
-      if (!aRes.error && Array.isArray(aRes.data) && aRes.data.length > 0) {
-        const sbIds = new Set(aRes.data.map((a) => a.id));
-        allApps = [
-          ...aRes.data,
-          ...allApps.filter((loc) => !sbIds.has(toUuid(loc.id)) && !sbIds.has(loc.id)),
-        ];
+        if (Array.isArray(sbData.opps) && sbData.opps.length > 0) {
+          const sbIds = new Set(sbData.opps.map((o) => o.id));
+          allOpps = [
+            ...sbData.opps,
+            ...allOpps.filter((loc) => !sbIds.has(toUuid(loc.id)) && !sbIds.has(loc.id)),
+          ];
+        }
+        if (Array.isArray(sbData.apps) && sbData.apps.length > 0) {
+          const sbIds = new Set(sbData.apps.map((a) => a.id));
+          allApps = [
+            ...sbData.apps,
+            ...allApps.filter((loc) => !sbIds.has(toUuid(loc.id)) && !sbIds.has(loc.id)),
+          ];
+        }
       }
     } catch {
       /* fallback to local store */
