@@ -105,11 +105,6 @@ export function getStore() {
   ]);
   let user = getItem(STORAGE_KEYS.USER, null);
 
-  if (!user) {
-    user = { ...INITIAL_USER, role: "admin" };
-    setItem(STORAGE_KEYS.USER, user);
-  }
-
   return { opps, dentists, clinics, apps, logs, user };
 }
 
@@ -326,7 +321,11 @@ async function handleApiCall(method, url, data = null, config = {}) {
   // 1. AUTH ENDPOINTS
   // --------------------------------------------------------------------------
   if (cleanUrl === "/auth/me") {
-    const activeUser = user || { ...INITIAL_USER, role: "admin" };
+    const token = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.TOKEN) : null;
+    if (!user || !token) {
+      return { data: null };
+    }
+    const activeUser = user;
     if (supabase && activeUser?.email) {
       try {
         const { data: dbUser } = await supabase
@@ -994,6 +993,116 @@ async function handleApiCall(method, url, data = null, config = {}) {
   // --------------------------------------------------------------------------
   // 7. ADMIN DASHBOARD & REALTIME DATABASE ENDPOINTS
   // --------------------------------------------------------------------------
+  // Admin Login Verification Gate (POST /admin/login)
+  // --------------------------------------------------------------------------
+  if (cleanUrl === "/admin/login") {
+    const password = (data?.password || "").trim();
+    const email = (data?.email || "info@dentalhubpro.com").toLowerCase().trim();
+
+    let authorized = false;
+    let dbAdminUser = null;
+
+    if (supabase) {
+      try {
+        // 1. Check admin_credentials table in Supabase
+        const { data: credRow } = await supabase
+          .from("admin_credentials")
+          .select("password_value")
+          .eq("setting_key", "admin_password")
+          .maybeSingle();
+
+        if (credRow && credRow.password_value === password) {
+          authorized = true;
+        }
+      } catch {
+        /* table may not exist yet */
+      }
+
+      try {
+        // 2. Check users table in Supabase for matching admin account password_hash
+        const { data: matchedAdmins } = await supabase
+          .from("users")
+          .select("*")
+          .eq("role", "admin")
+          .eq("password_hash", password);
+
+        if (Array.isArray(matchedAdmins) && matchedAdmins.length > 0) {
+          authorized = true;
+          dbAdminUser = matchedAdmins.find((u) => u.email.toLowerCase() === email) || matchedAdmins[0];
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    // 3. Fallback: master required password
+    if (password === "dentalhubpro2026") {
+      authorized = true;
+    }
+
+    const logEntry = {
+      id: toUuid(),
+      type: "admin_login",
+      admin_id: dbAdminUser?.id ? toUuid(dbAdminUser.id) : null,
+      admin_email: dbAdminUser?.email || email || "info@dentalhubpro.com",
+      success: authorized,
+      ip: "127.0.0.1",
+      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "AdminBrowser",
+      created_at: new Date().toISOString(),
+    };
+
+    if (supabase) {
+      try {
+        await supabase.from("audit_logs").insert(logEntry);
+      } catch {
+        /* ignore */
+      }
+    }
+    setItem(STORAGE_KEYS.AUDIT_LOGS, [logEntry, ...logs].slice(0, 50));
+    notifyRealtimeChange("audit_logs", "INSERT", logEntry);
+
+    if (!authorized) {
+      const err = new Error("Invalid admin password");
+      err.response = { data: { detail: "Invalid admin password. Please try again." } };
+      throw err;
+    }
+
+    const adminUser = dbAdminUser || {
+      ...INITIAL_USER,
+      id: toUuid(email || "admin"),
+      name:
+        email === "tdvsatishkumar@gmail.com"
+          ? "Dr. T. D. V. Satish Kumar"
+          : email === "vsv.visakhapatnam@gmail.com"
+          ? "VSV Visakhapatnam Admin"
+          : "Dental Hub Admin",
+      email: email || "info@dentalhubpro.com",
+      role: "admin",
+      profile_type: "Admin",
+    };
+
+    const token = "doh_admin_token_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+
+    if (supabase && adminUser.id) {
+      try {
+        await supabase.from("user_sessions").insert({
+          session_token: token,
+          user_id: toUuid(adminUser.id),
+          expires_at: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
+        });
+      } catch {
+        /* ignore */
+      }
+    }
+
+    setItem(STORAGE_KEYS.USER, adminUser);
+    setItem(STORAGE_KEYS.TOKEN, token);
+    notifyRealtimeChange("users", "LOGIN", adminUser);
+
+    return { data: { ...adminUser, session_token: token } };
+  }
+
+  // --------------------------------------------------------------------------
   let allUsers = [
     ...dentists.map((d) => ({ ...d, role: d.role || "seeker" })),
     ...clinics.map((c) => ({ ...c, role: c.role || "giver" })),
@@ -1230,8 +1339,39 @@ async function handleApiCall(method, url, data = null, config = {}) {
   // Admin Confidential Records Vault (`POST /admin/confidential`)
   if (cleanUrl === "/admin/confidential") {
     const pwd = (data?.password || "").trim();
-    const validPasswords = ["dentalhubpro2026", "admin123", "dentalhub", "satish2026", "vizag2026"];
-    const isSuccess = validPasswords.includes(pwd) || pwd.length >= 4;
+    let isSuccess = false;
+
+    if (supabase) {
+      try {
+        const { data: credRow } = await supabase
+          .from("admin_credentials")
+          .select("password_value")
+          .eq("setting_key", "admin_password")
+          .maybeSingle();
+        if (credRow && credRow.password_value === pwd) {
+          isSuccess = true;
+        }
+      } catch {
+        /* ignore */
+      }
+
+      try {
+        const { data: adminMatches } = await supabase
+          .from("users")
+          .select("id")
+          .eq("role", "admin")
+          .eq("password_hash", pwd);
+        if (adminMatches && adminMatches.length > 0) {
+          isSuccess = true;
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    if (pwd === "dentalhubpro2026") {
+      isSuccess = true;
+    }
 
     const logEntry = {
       id: toUuid(),

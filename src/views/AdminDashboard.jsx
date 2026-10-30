@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
 import { subscribeToRealtime, isSupabaseConfigured } from "@/lib/supabase";
 import { VerificationBadge, topVerification } from "@/components/VerificationBadge";
@@ -57,6 +58,7 @@ const SIDEBAR_ITEMS = [
 ];
 
 export default function AdminDashboard() {
+  const { logout } = useAuth();
   const [activeSection, setActiveSection] = useState("analytics");
   const [stats, setStats] = useState(null);
   const [opps, setOpps] = useState([]);
@@ -68,6 +70,11 @@ export default function AdminDashboard() {
   const [syncingDb, setSyncingDb] = useState(false);
   const [lastRealtimeEvent, setLastRealtimeEvent] = useState("Connected · Live listening");
   const [realtimeEvents, setRealtimeEvents] = useState([]);
+
+  const handleLockSession = async () => {
+    await logout();
+    toast.info("Admin session locked.");
+  };
 
   // Filters for Opportunities & Users
   const [oppSearch, setOppSearch] = useState("");
@@ -340,30 +347,39 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
             <Button
               data-testid="admin-supabase-sync-btn"
               onClick={syncSupabaseNow}
               disabled={syncingDb}
               variant="outline"
-              className="rounded-full border-teal-200 bg-teal-50/60 text-teal-700 hover:bg-teal-100 font-semibold h-10"
+              className="rounded-full border-teal-200 bg-teal-50/60 text-teal-700 hover:bg-teal-100 font-semibold h-9 sm:h-10 text-xs sm:text-sm"
             >
               {syncingDb ? (
                 <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
               ) : (
                 <RefreshCw className="h-4 w-4 mr-1.5 text-teal-600" />
               )}
-              Sync Database Now
+              Sync Database
             </Button>
 
             <Link to="/admin/confidential">
               <Button
                 data-testid="open-confidential-top"
-                className="rounded-full bg-gradient-to-r from-teal-600 to-sky-600 hover:from-teal-700 hover:to-sky-700 text-white font-semibold h-10 shadow-sm"
+                className="rounded-full bg-gradient-to-r from-teal-600 to-sky-600 hover:from-teal-700 hover:to-sky-700 text-white font-semibold h-9 sm:h-10 text-xs sm:text-sm shadow-sm"
               >
                 <Lock className="h-4 w-4 mr-1.5" /> Confidential Vault
               </Button>
             </Link>
+
+            <Button
+              data-testid="admin-lock-session-btn"
+              onClick={handleLockSession}
+              variant="outline"
+              className="rounded-full border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-semibold h-9 sm:h-10 text-xs sm:text-sm"
+            >
+              <Lock className="h-4 w-4 mr-1.5 text-slate-400" /> Lock Panel
+            </Button>
           </div>
         </div>
 
@@ -371,12 +387,13 @@ export default function AdminDashboard() {
         <div className="grid lg:grid-cols-12 gap-6 items-start">
           {/* Left Side-Menu Navigation */}
           <aside className="lg:col-span-3 xl:col-span-2.5 lg:sticky lg:top-24 rounded-3xl border border-slate-200/90 bg-white p-3 shadow-sm">
-            <div className="px-3 py-2 mb-1 border-b border-slate-100">
+            <div className="px-3 py-2 mb-1 border-b border-slate-100 flex items-center justify-between">
               <p className="text-[11px] font-bold uppercase tracking-wider text-teal-700">
                 Admin Navigation
               </p>
+              <span className="lg:hidden text-[10px] text-slate-400">Swipe tabs →</span>
             </div>
-            <nav className="flex lg:flex-col gap-1 overflow-x-auto pb-1 lg:pb-0">
+            <nav className="flex lg:flex-col gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
               {SIDEBAR_ITEMS.map((item) => {
                 const Icon = item.icon;
                 const active = activeSection === item.key;
@@ -396,19 +413,19 @@ export default function AdminDashboard() {
                     key={item.key}
                     data-testid={item.testid}
                     onClick={() => setActiveSection(item.key)}
-                    className={`w-full flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition-all whitespace-nowrap ${
+                    className={`shrink-0 lg:w-full flex items-center justify-between gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
                       active
                         ? "bg-gradient-to-r from-teal-600 to-sky-600 text-white shadow-sm"
                         : "text-slate-700 hover:bg-teal-50/70 hover:text-teal-700"
                     }`}
                   >
-                    <span className="flex items-center gap-2.5">
+                    <span className="flex items-center gap-2">
                       <Icon className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-teal-600"}`} />
                       <span>{item.label}</span>
                     </span>
                     {badgeCount !== null && (
                       <span
-                        className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                        className={`rounded-full px-2 py-0.5 text-[10px] sm:text-[11px] font-bold ${
                           active
                             ? "bg-white/20 text-white"
                             : "bg-slate-100 text-slate-600"
@@ -737,7 +754,10 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 overflow-x-auto">
-                  <Table>
+                  <div className="sm:hidden px-3 py-1.5 bg-slate-50 border-b border-slate-100 text-[11px] text-slate-500">
+                    ← Swipe horizontally to view full table →
+                  </div>
+                  <Table className="min-w-[760px] w-full">
                     <TableHeader>
                       <TableRow className="bg-slate-50/80">
                         <TableHead>Title</TableHead>
@@ -974,7 +994,10 @@ export default function AdminDashboard() {
                   </Button>
                 </div>
                 <div className="rounded-2xl border border-slate-200 overflow-x-auto">
-                  <Table>
+                  <div className="sm:hidden px-3 py-1.5 bg-slate-50 border-b border-slate-100 text-[11px] text-slate-500">
+                    ← Swipe horizontally to view full table →
+                  </div>
+                  <Table className="min-w-[760px] w-full">
                     <TableHeader>
                       <TableRow className="bg-slate-50/80">
                         <TableHead>Applicant</TableHead>

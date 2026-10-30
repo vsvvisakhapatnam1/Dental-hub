@@ -417,7 +417,7 @@ CREATE TRIGGER trg_payment_transactions_updated_at
 CREATE TABLE IF NOT EXISTS public.audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   type TEXT NOT NULL DEFAULT 'confidential_access'
-    CHECK (type IN ('confidential_access', 'admin_action')),
+    CHECK (type IN ('confidential_access', 'admin_action', 'admin_login')),
   admin_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   admin_email TEXT NOT NULL,
   success BOOLEAN NOT NULL DEFAULT FALSE,
@@ -433,6 +433,21 @@ CREATE TABLE IF NOT EXISTS public.digest_runs (
   day DATE PRIMARY KEY,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- ----------------------------------------------------------------------------
+-- 3.13 ADMIN_CREDENTIALS (Secure Admin Panel Passwords & System Settings)
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.admin_credentials (
+  setting_key TEXT PRIMARY KEY,
+  password_value TEXT NOT NULL,
+  description TEXT,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+DROP TRIGGER IF EXISTS trg_admin_credentials_updated_at ON public.admin_credentials;
+CREATE TRIGGER trg_admin_credentials_updated_at
+  BEFORE UPDATE ON public.admin_credentials
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
 -- ============================================================================
 -- 4. INDEXES & FULL-TEXT / TRIGRAM SEARCH INDEXES
@@ -661,6 +676,9 @@ CREATE POLICY "Access password_reset_tokens" ON public.password_reset_tokens FOR
 DROP POLICY IF EXISTS "Access digest_runs" ON public.digest_runs;
 CREATE POLICY "Access digest_runs" ON public.digest_runs FOR ALL USING (true) WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Access admin_credentials" ON public.admin_credentials;
+CREATE POLICY "Access admin_credentials" ON public.admin_credentials FOR ALL USING (true) WITH CHECK (true);
+
 -- ============================================================================
 -- 7. SUPABASE STORAGE BUCKET ('cvs') FOR PRIVATE CV / DOCUMENT FILES
 -- ============================================================================
@@ -737,7 +755,7 @@ INSERT INTO public.users (
   (
     '00000000-0000-4000-a000-000000000001',
     'tdvsatishkumar@gmail.com',
-    '$2b$12$PLACEHOLDER_BCRYPT_HASH_REPLACE_OR_KEEP_FROM_MONGO',
+    'dentalhubpro2026',
     FALSE,
     'email',
     'Dr. T. D. V. Satish Kumar',
@@ -752,7 +770,7 @@ INSERT INTO public.users (
   (
     '00000000-0000-4000-a000-000000000002',
     'vsv.visakhapatnam@gmail.com',
-    '$2b$12$PLACEHOLDER_BCRYPT_HASH_REPLACE_OR_KEEP_FROM_MONGO',
+    'dentalhubpro2026',
     FALSE,
     'email',
     'VSV Visakhapatnam Admin',
@@ -767,7 +785,7 @@ INSERT INTO public.users (
   (
     '00000000-0000-4000-a000-000000000003',
     'info@dentalhubpro.com',
-    '$2b$12$PLACEHOLDER_BCRYPT_HASH_REPLACE_OR_KEEP_FROM_MONGO',
+    'dentalhubpro2026',
     FALSE,
     'email',
     'Dental Hub Pro Support',
@@ -780,9 +798,16 @@ INSERT INTO public.users (
     FALSE
   )
 ON CONFLICT (email) DO UPDATE SET
+  password_hash = 'dentalhubpro2026',
   role = 'admin',
   profile_type = 'Team'
 WHERE public.users.password_changed = FALSE;
+
+-- 9.2 Admin Portal Master Password Setting
+INSERT INTO public.admin_credentials (setting_key, password_value, description)
+VALUES ('admin_password', 'dentalhubpro2026', 'Master access password for Dental Hub Pro Admin Portal')
+ON CONFLICT (setting_key) DO UPDATE
+SET password_value = EXCLUDED.password_value, updated_at = NOW();
 
 -- 9.2 Initial Marketplace Dentists (Seekers) & Clinics (Givers)
 INSERT INTO public.users (

@@ -120,13 +120,13 @@ export function Navbar() {
         <Link
           to="/"
           data-testid="nav-logo"
-          className="flex items-center shrink-0 h-full py-0.5 focus:outline-none"
+          className="flex items-center shrink-0 py-1 focus:outline-none"
           aria-label="Dental Hub Pro Home"
         >
           <img
             src="/logo.png"
             alt="Dental Hub Pro Logo"
-            className="h-[68px] sm:h-[72px] lg:h-[76px] w-auto max-w-[260px] sm:max-w-[310px] object-contain transition-transform duration-200 hover:scale-[1.02]"
+            className="h-11 sm:h-14 lg:h-[64px] w-auto max-w-[190px] sm:max-w-[240px] lg:max-w-[270px] object-contain object-left transition-transform duration-200 hover:scale-[1.02]"
           />
         </Link>
 
@@ -245,11 +245,16 @@ export function Navbar() {
             onClick={() => navigate("/admin")}
             className={`rounded-full h-10 px-3.5 font-semibold transition-all whitespace-nowrap ${
               location.pathname.startsWith("/admin")
-                ? "bg-sky-600 text-white border-sky-600 hover:bg-sky-700"
+                ? "bg-sky-600 text-white border-sky-600 hover:bg-sky-700 shadow-sm"
                 : "border-slate-200 text-slate-700 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700"
             }`}
           >
-            <ShieldCheck className="h-4 w-4 mr-1 text-sky-600" /> Admin
+            <ShieldCheck
+              className={`h-4 w-4 mr-1.5 transition-colors ${
+                location.pathname.startsWith("/admin") ? "text-white" : "text-sky-600"
+              }`}
+            />
+            Admin
           </Button>
 
           {user ? (
