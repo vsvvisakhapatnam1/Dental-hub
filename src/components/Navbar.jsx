@@ -118,29 +118,31 @@ export function Navbar() {
       {/* Main Navbar Container — fixed h-20 height with logo and perfectly aligned items */}
       <div className="mx-auto w-full max-w-[1480px] px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         {/* Left: Brand Logo */}
-        <Link
-          to="/"
-          data-testid="nav-logo"
-          className="flex items-center shrink-0 py-1 focus:outline-none"
-          aria-label="Dental Hub Home"
-        >
-          <img
-            src="/logo.png"
-            alt="Dental Hub Logo"
-            className="h-12 sm:h-14 lg:h-[62px] w-auto max-w-[85px] sm:max-w-[95px] lg:max-w-[105px] object-contain object-left transition-transform duration-200 hover:scale-105"
-          />
-        </Link>
+        <div className="flex items-center shrink-0 w-24 sm:w-28">
+          <Link
+            to="/"
+            data-testid="nav-logo"
+            className="flex items-center shrink-0 py-1 focus:outline-none"
+            aria-label="Dental Hub Home"
+          >
+            <img
+              src="/logo.png"
+              alt="Dental Hub Logo"
+              className="h-12 sm:h-14 lg:h-[62px] w-auto max-w-[85px] sm:max-w-[95px] lg:max-w-[105px] object-contain object-left transition-transform duration-200 hover:scale-105"
+            />
+          </Link>
+        </div>
 
         {/* Center: Main Navigation Pill Container */}
         <nav
           aria-label="Main Navigation"
-          className="hidden xl:flex items-center justify-center gap-0.5 rounded-full bg-slate-50/90 border border-slate-200/80 px-2.5 py-1"
+          className="hidden xl:flex items-center justify-center gap-0.5 rounded-full bg-slate-50/90 border border-slate-200/80 px-3 py-1 shadow-2xs mx-auto"
         >
           {/* 1st Option: About */}
           <Link
             to="/about"
             data-testid="nav-about"
-            className={`px-3 py-2 rounded-full text-[13.5px] font-semibold transition-all whitespace-nowrap ${
+            className={`px-3.5 py-2 rounded-full text-[13.5px] font-semibold transition-all whitespace-nowrap ${
               isActive("/about")
                 ? "bg-teal-50 text-teal-700"
                 : "text-slate-700 hover:bg-teal-50/70 hover:text-teal-700"
@@ -161,7 +163,7 @@ export function Navbar() {
           <Link
             to="/dentists"
             data-testid="nav-dentists"
-            className={`px-3 py-2 rounded-full text-[13.5px] font-semibold transition-all whitespace-nowrap ${
+            className={`px-3.5 py-2 rounded-full text-[13.5px] font-semibold transition-all whitespace-nowrap ${
               isActive("/dentists")
                 ? "bg-teal-50 text-teal-700"
                 : "text-slate-700 hover:bg-teal-50/70 hover:text-teal-700"
@@ -174,7 +176,7 @@ export function Navbar() {
           <Link
             to="/clinics"
             data-testid="nav-clinics"
-            className={`px-3 py-2 rounded-full text-[13.5px] font-semibold transition-all whitespace-nowrap ${
+            className={`px-3.5 py-2 rounded-full text-[13.5px] font-semibold transition-all whitespace-nowrap ${
               isActive("/clinics")
                 ? "bg-teal-50 text-teal-700"
                 : "text-slate-700 hover:bg-teal-50/70 hover:text-teal-700"
@@ -203,7 +205,7 @@ export function Navbar() {
           <Link
             to="/team"
             data-testid="nav-our-team"
-            className={`px-3 py-2 rounded-full text-[13.5px] font-semibold transition-all whitespace-nowrap ${
+            className={`px-3.5 py-2 rounded-full text-[13.5px] font-semibold transition-all whitespace-nowrap ${
               isActive("/team")
                 ? "bg-teal-50 text-teal-700"
                 : "text-slate-700 hover:bg-teal-50/70 hover:text-teal-700"
@@ -216,7 +218,7 @@ export function Navbar() {
           <Link
             to="/contact"
             data-testid="nav-contact"
-            className={`px-3 py-2 rounded-full text-[13.5px] font-semibold transition-all whitespace-nowrap ${
+            className={`px-3.5 py-2 rounded-full text-[13.5px] font-semibold transition-all whitespace-nowrap ${
               isActive("/contact")
                 ? "bg-teal-50 text-teal-700"
                 : "text-slate-700 hover:bg-teal-50/70 hover:text-teal-700"
@@ -226,9 +228,9 @@ export function Navbar() {
           </Link>
         </nav>
 
-        {/* Right: Auth Action */}
-        <div className="hidden xl:flex items-center gap-2.5 shrink-0">
-          {user ? (
+        {/* Right side: User Profile (when logged in) or spacer */}
+        <div className="hidden xl:flex items-center justify-end gap-2.5 shrink-0 w-24 sm:w-28">
+          {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -272,16 +274,6 @@ export function Navbar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <Button
-              data-testid="nav-login"
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/login")}
-              className="rounded-full h-10 px-5 font-semibold text-slate-700 border-slate-200 hover:border-teal-500 hover:text-teal-700 hover:bg-teal-50 transition-all"
-            >
-              Login
-            </Button>
           )}
         </div>
 
@@ -346,38 +338,31 @@ export function Navbar() {
                 ))}
               </div>
 
-              <div className="border-t border-slate-200 my-4" />
-              {user ? (
-                <div className="flex flex-col gap-2">
-                  <Button
-                    data-testid="mnav-dashboard"
-                    variant="outline"
-                    onClick={() => go(dashPath)}
-                    className="rounded-xl border-teal-600 text-teal-700 font-semibold"
-                  >
-                    {user.role === "admin" ? "Admin Dashboard" : "Member Dashboard"}
-                  </Button>
-                  <Button
-                    data-testid="mnav-logout"
-                    variant="ghost"
-                    onClick={() => {
-                      setOpen(false);
-                      handleLogout();
-                    }}
-                    className="rounded-xl text-red-600"
-                  >
-                    Log out
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  data-testid="mnav-login"
-                  variant="outline"
-                  onClick={() => go("/login")}
-                  className="rounded-xl border-slate-300 font-semibold w-full h-11"
-                >
-                  Login
-                </Button>
+              {user && (
+                <>
+                  <div className="border-t border-slate-200 my-4" />
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      data-testid="mnav-dashboard"
+                      variant="outline"
+                      onClick={() => go(dashPath)}
+                      className="rounded-xl border-teal-600 text-teal-700 font-semibold"
+                    >
+                      {user.role === "admin" ? "Admin Dashboard" : "Member Dashboard"}
+                    </Button>
+                    <Button
+                      data-testid="mnav-logout"
+                      variant="ghost"
+                      onClick={() => {
+                        setOpen(false);
+                        handleLogout();
+                      }}
+                      className="rounded-xl text-red-600"
+                    >
+                      Log out
+                    </Button>
+                  </div>
+                </>
               )}
             </div>
           </SheetContent>

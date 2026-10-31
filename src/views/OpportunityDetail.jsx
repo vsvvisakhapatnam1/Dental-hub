@@ -29,7 +29,7 @@ export default function OpportunityDetail() {
   }, [id]);
 
   const apply = async () => {
-    if (!user) { toast.error("Please log in to apply"); navigate("/login"); return; }
+    if (!user) { toast.error("Please register to apply"); navigate("/register"); return; }
     setApplying(true);
     try {
       await api.post("/applications", { opportunity_id: id, message: msg });

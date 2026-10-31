@@ -48,7 +48,7 @@ export default function ForgotPassword() {
           </form>
         )}
         <p className="mt-6 text-center text-sm text-slate-500">
-          <Link to="/login" data-testid="forgot-password-back-login" className="text-emerald-800 font-semibold">Back to login</Link>
+          <Link to="/" data-testid="forgot-password-back-home" className="text-teal-700 font-semibold hover:underline">Back to Home</Link>
         </p>
       </div>
     </div>

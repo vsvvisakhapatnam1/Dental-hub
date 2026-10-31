@@ -153,7 +153,6 @@ export default function Register() {
             <span className="mt-6 inline-flex items-center gap-1 font-semibold text-amber-700 dark:text-amber-400">Register as Giver <ArrowRight className="h-4 w-4" /></span>
           </motion.button>
         </div>
-        <p className="mt-8 text-center text-sm text-slate-500">Already have an account? <Link to="/login" className="text-emerald-800 font-semibold">Log in</Link></p>
       </div>
     );
   }

@@ -21,7 +21,7 @@ export function ProtectedRoute({ children, adminOnly = false }) {
       return <AdminLogin />;
     }
   } else if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;

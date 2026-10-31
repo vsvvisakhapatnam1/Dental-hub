@@ -25,10 +25,10 @@ export default function AuthCallback() {
         window.history.replaceState({}, document.title, "/dashboard");
         navigate(data.role === "admin" ? "/admin" : "/dashboard", { replace: true });
       } catch {
-        navigate("/login", { replace: true });
+        navigate("/", { replace: true });
       }
     };
-    if (sessionId) run(); else navigate("/login", { replace: true });
+    if (sessionId) run(); else navigate("/", { replace: true });
   }, [navigate, setUser]);
 
   return (
