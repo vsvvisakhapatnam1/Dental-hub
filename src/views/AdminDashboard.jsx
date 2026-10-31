@@ -76,6 +76,15 @@ export default function AdminDashboard() {
     toast.info("Admin session locked.");
   };
 
+  // Auto-logout from admin panel when leaving admin route
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/admin")) {
+        logout();
+      }
+    };
+  }, [logout]);
+
   // Filters for Opportunities & Users
   const [oppSearch, setOppSearch] = useState("");
   const [oppStatusFilter, setOppStatusFilter] = useState("all");

@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SPECIALITIES, CITIES } from "@/lib/constants";
 import {
   Search, Briefcase, Building2, Users, GraduationCap, Globe2, Wrench, PlusCircle,
-  ArrowRight, ShieldCheck, HeartHandshake, BadgeCheck, Stethoscope, Activity,
+  ArrowRight, ShieldCheck, HeartHandshake, BadgeCheck, Stethoscope, Activity, UserPlus,
 } from "lucide-react";
 
 const LOOKING_QUICK = ["Job", "Clinic Space", "Practice Partner", "Course", "MDS Admission", "Abroad Opportunity", "Dental Service", "Practice Partnership"];
@@ -150,6 +150,17 @@ export default function Home() {
           </div>
 
           <div className="lg:col-span-5">
+            {/* Centered Register Button above Seeker and Giver boxes */}
+            <div className="mb-3 flex justify-center">
+              <Button
+                data-testid="hero-register-btn"
+                onClick={() => navigate("/register")}
+                className="rounded-full px-8 h-10 bg-gradient-to-r from-teal-600 to-sky-600 hover:from-teal-700 hover:to-sky-700 text-white font-bold text-sm shadow-md shadow-teal-600/20 hover:scale-[1.02] transition-all flex items-center gap-2"
+              >
+                <UserPlus className="h-4 w-4" /> Register
+              </Button>
+            </div>
+
             <div className="mb-3.5 grid grid-cols-2 gap-3">
               <button
                 data-testid="hero-register-seeker"

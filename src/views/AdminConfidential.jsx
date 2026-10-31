@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import api, { formatApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,10 +24,20 @@ import {
 } from "lucide-react";
 
 export default function AdminConfidential() {
+  const { logout } = useAuth();
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [data, setData] = useState(null);
   const [logs, setLogs] = useState([]);
+
+  // Auto-logout from admin panel when leaving admin route
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/admin")) {
+        logout();
+      }
+    };
+  }, [logout]);
 
   const unlock = async (e) => {
     e?.preventDefault();

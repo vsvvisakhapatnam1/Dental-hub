@@ -1,7 +1,8 @@
 "use client";
 
-import Products from "@/views/Products";
+import ProductPage from "@/app/product/page";
 
 export default function ProductsPage() {
-  return <Products />;
+  return <ProductPage />;
 }
+
